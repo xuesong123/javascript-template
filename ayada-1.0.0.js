@@ -2151,7 +2151,6 @@ var com = (function(){
                         expr.setLength(1);
                         expr.setLineNumber(this.lineNumber);
                         expr.append(expression.join(""));
-                        /* 表达式预编译 */ 
                         expr.eval = new Function("pageContext", "try{with(pageContext.attributes){return " + expression.join("") +  ";}}catch(e){} return null;");
                         list.push(expr);
                         break;
@@ -3001,6 +3000,7 @@ var com = (function(){
     };
 
     /**
+     * @param prefix
      * @param node
      * @return String
      */
@@ -3093,7 +3093,9 @@ var com = (function(){
     };
 
     /**
+     * @param home
      * @param file
+     * @param encoding
      * @return String
      */
     TemplateFactory.getSource = function(home, file, encoding){
@@ -3143,6 +3145,9 @@ var com = (function(){
     };
 
     /**
+     * @param path
+     * @param context
+     * @param writer
      * @return int
      */
     TemplateContext.prototype.getTemplate = function(path, context, writer){
@@ -3225,14 +3230,14 @@ var com = (function(){
     /**
      * @return int
      */
-    Tag.prototype.doStartTag = function(parent){
+    Tag.prototype.doStartTag = function(){
         throw new InterfaceException();
     };
 
     /**
      * @return int
      */
-    Tag.prototype.doEndTag = function(parent){
+    Tag.prototype.doEndTag = function(){
         throw new InterfaceException();
     };
 
