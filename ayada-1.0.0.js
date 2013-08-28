@@ -2095,11 +2095,11 @@ var com = (function(){
      * Use is subject to license terms.
      */
     var TemplateCompiler = com.skin.ayada.compile.TemplateCompiler = com.skin.framework.Class.create(com.skin.ayada.compile.PageCompiler, function(){
-            this.home = null;
-            this.file = null;
-            this.lineNumber = 1;
-            this.tagLibrary = null;
-            this.logger = com.skin.log.LoggerFactory.getLogger("TemplateCompiler");
+        this.home = null;
+        this.file = null;
+        this.lineNumber = 1;
+        this.tagLibrary = null;
+        this.logger = com.skin.log.LoggerFactory.getLogger("TemplateCompiler");
     });
 
     /**
@@ -2151,7 +2151,7 @@ var com = (function(){
                         expr.setLength(1);
                         expr.setLineNumber(this.lineNumber);
                         expr.append(expression.join(""));
-                        /* ±Ì¥Ô Ω‘§±‡“Î */ 
+                        /* Ë°®ËææÂºèÈ¢ÑÁºñËØë */ 
                         expr.eval = new Function("pageContext", "try{with(pageContext.attributes){return " + expression.join("") +  ";}}catch(e){} return null;");
                         list.push(expr);
                         break;
@@ -2695,17 +2695,17 @@ var com = (function(){
     };
 
     /**
-     * @return the nodes
-     */
-    Template.prototype.getNodes = function(){
-        return this.nodes;
-    };
-
-    /**
      * @param nodes the nodes to set
      */
     Template.prototype.setNodes = function(nodes){
         this.nodes = nodes;
+    };
+
+    /**
+     * @return the nodes
+     */
+    Template.prototype.getNodes = function(){
+        return this.nodes;
     };
 
     /**
