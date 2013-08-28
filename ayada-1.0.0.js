@@ -2403,7 +2403,7 @@ var com = (function(){
 
         if(node == null)
         {
-            throw {"name": "RuntimeException", "message": ("Exception at line #" + this.lineNumber + ": </" + nodeName + "> not match !")};
+            throw {"name": "RuntimeException", "message": "Exception at line #" + this.lineNumber + ": </" + nodeName + "> not match !"};
         }
 
         if(node.getNodeName() == nodeName)
@@ -4116,7 +4116,7 @@ var com = (function(){
 
         if(parent == null)
         {
-            throw new RuntimeException("when tag must be in choose tag !");
+            throw {"name": "RuntimeException", "message": "otherwise tag must be in choose tag !"};
         }
 
         var chooseTag = parent;
@@ -4354,7 +4354,7 @@ var com = (function(){
 
         if(parent == null)
         {
-            throw new RuntimeException("when tag must be in choose tag !");
+            throw {"name": "RuntimeException", "message": "when tag must be in choose tag !"};
         }
 
         var chooseTag = parent;
