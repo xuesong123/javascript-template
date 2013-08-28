@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+ * Skin Framework v1.0.0
+ * Copyright (c) 2010 xuesong.net
+ * 
+ * mailto: xuesong.net@163.com
+ * Date: 2010-04-28 10:24:21
+ * Revision: 1012
+-->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Cache-Control" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<title>Console</title>
+<link rel="stylesheet" type="text/css" href="css/console.css"/>
+<script type="text/javascript" src="js/console.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+window.onload = function()
+{
+    var date = new Date();
+    var tomorrow = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+
+    for(var i = 0; i < 1; i++)
+    {
+        logger.debug("console is ready !");
+        logger.debug(Console.getDateTime(tomorrow));
+    }
+
+    var b = null;
+
+    if(b)
+    {
+        logger.debug("true");
+    }
+    else
+    {
+        logger.debug("false");
+    }
+};
+//]]>
+</script>
+</head>
+<body>
+<div id="console" class="console" scroll="document"></div>
+</body>
+</html>

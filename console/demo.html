@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Cache-Control" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<title>Console</title>
+<link rel="stylesheet" type="text/css" href="css/console.css"/>
+<script type="text/javascript" src="js/console.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+var Util = {};
+
+Util.open = function(url, width, height)
+{
+    var x = Math.floor((window.clientWidth - width) / 2);
+    var y = Math.floor((window.clientHeight - height) / 2);
+    var type = 1;
+
+    if(window.showModalDialog != null && type == 0)
+    {
+        var features = "dialogLeft:" + x + "px;"
+            + " dialogTop:" + y + "px;"
+            + " dialogWidth: " + width + "px;"
+            + " dialogHeight:" + height + "px;"
+            + " edge: raised;"
+            + " resizable: no;"
+            + " directories: yes;"
+            + " scroll: no;"
+            + " status: no;"
+            + " help: no;"
+            + " modal=yes;";
+
+        var returnValue = window.showModalDialog(url, window, features);
+    }
+    else if(window.showModelessDialog != null && type == 1)
+    {
+        var features = "dialogLeft:" + x + "px;"
+            + " dialogTop:" + y + "px;"
+            + " dialogWidth: " + width + "px;"
+            + " dialogHeight:" + height + "px;"
+            + " edge: raised;"
+            + " resizable: no;"
+            + " directories: yes;"
+            + " scroll: no;"
+            + " status: no;"
+            + " help: no;"
+            + " modal=yes;";
+
+        var returnValue = window.showModelessDialog(url, window, features);
+    }
+    else
+    {
+        var features = "top=" + y + "px,"
+            + "left=" + x + "px,"
+            + "width=" + width + "px,"
+            + "height=" + height + "px,"
+            + "toolbar=no,"
+            + "location=no,"
+            + "directories=no,"
+            + "status=no,"
+            + "menubar=no,"
+            + "scrollbars=no,"
+            + "resizable=no,"
+            + "innerHeight=0";
+
+        window.open(url, "Dialog", features);
+    }
+};
+
+window.onload = function()
+{
+
+};
+//]]>
+</script>
+</head>
+<body>
+<div class="menubar">
+    <input type="button" class="button" value=" 刷 新 " onclick="window.location.reload();"/>
+    <input type="button" class="button" value=" 清 空 " onclick="Console.clear();"/>
+    <input type="button" class="button" value=" 显 示 " onclick="Console.open();"/>
+    <input type="button" class="button" value=" 关 闭 " onclick="Console.close();"/>
+    <input type="button" class="button" value=" 测 试 " onclick="Console.println('console is ready !');"/>
+    <input type="button" class="button" value=" 全 选 " onclick="Console.select();"/>
+    <input type="button" class="button" value=" 脚 本 " onclick="Util.open('script.html', 600, 400);"/>
+    <input type="button" class="button" value=" 滚 动 " onclick="Console.setScroll();"/>
+</div>
+<div id="console" class="console" style="height: 300px; border: 1px solid #99bbe8; overflow: scroll;"></div>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+ * Skin Framework v1.0.0
+ * Copyright (c) 2010 xuesong.net
+ * 
+ * mailto: xuesong.net@163.com
+ * Date: 2010-04-28 10:24:21
+ * Revision: 1012
+-->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Cache-Control" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<title>ScriptConsole</title>
+<link rel="stylesheet" type="text/css" href="css/console.css"/>
+<script type="text/javascript">
+//<![CDATA[
+var Util = {};
+var logger = {debug: function(s, b){}};
+
+Util.SetupAccessKey = function()
+{
+    if(window.dialogArguments != null || window.opener != null)
+    {
+        var OnKeyDown = function(evt)
+        {
+            var event = (window.event != null ? window.event : evt);
+
+            if(event != null)
+            {
+                if(event.keyCode == 27)
+                {
+                    // ESC
+                    if(window.parent != null && window != window.parent)
+                    {
+                        window.parent.close();
+                    }
+                    else
+                    {
+                        window.close();
+                    }
+                }
+                else if(event.keyCode == 116)
+                {
+                    // F5
+                    window.location.href = window.location.href;
+                }
+                else if(event.ctrlKey == true && event.keyCode == 78)
+                {
+                    // CTRL + N
+                    window.open(window.location.href);
+                }
+            }
+        };
+
+        if(document.attachEvent != null)
+        {
+            window.attachEvent("onload", function(){try{window.focus();}catch(e){}});
+            document.attachEvent("onkeydown", OnKeyDown);
+        }
+        else
+        {
+            window.addEventListener("load", function(){try{window.focus();}catch(e){}}, false);
+            document.addEventListener("keydown", OnKeyDown, false);
+        }
+    }
+};
+
+window.getOpener = function()
+{
+    if(window.dialogArguments != null)
+    {
+        return window.dialogArguments;
+    }
+    else if(window.opener != null)
+    {
+        return window.opener;
+    }
+    else if(window != window.parent)
+    {
+        return window.parent;
+    }
+
+    return null;
+};
+
+window.getTopWindow = function()
+{
+    var opener = window.getOpener();
+
+    if(opener != null)
+    {
+        /**
+         * opener: menu.html
+         * opener.parent: index.html
+         * opener.parent.parent: default.html
+         */
+        return opener.parent.parent.window;
+    }
+
+    return null;
+};
+
+window.getLeftFrame = function()
+{
+    var top = window.getTopWindow();
+
+    if(top != null)
+    {
+        return top.document.getElementById("LeftFrame");
+    }
+
+    return null;
+};
+
+window.getMainFrame = function()
+{
+    var top = window.getTopWindow();
+
+    if(top != null)
+    {
+        return top.document.getElementById("MainFrame");
+    }
+
+    return null;
+};
+
+window.getConsoleFrame = function()
+{
+    var top = window.getTopWindow();
+
+    if(top != null)
+    {
+        return top.document.getElementById("ConsoleFrame");
+    }
+
+    return null;
+};
+
+window.run = function()
+{
+    try
+    {
+        var source = document.getElementById("source");
+
+        if(source != null)
+        {
+            window.eval(source.value);
+        }
+    }
+    catch(e)
+    {
+        logger.debug("error: " + e.name + ": " + e.message);
+    }
+};
+
+window.onload = function()
+{
+    Util.SetupAccessKey();
+
+    var topWindow = window.getTopWindow();
+
+    if(topWindow != null)
+    {
+        if(topWindow != window && topWindow.logger != null && topWindow.logger.debug != null)
+        {
+            logger = topWindow.logger;
+        }
+        else
+        {
+            logger = {debug: function(s, b){}, getDateTime: function(date){}}
+        }
+    }
+}
+//]]>
+</script>
+</head>
+<body style="background-color: #bbccdd;">
+<div>
+    <div style="width: 580px; margin: 10px auto 0px auto;">
+        <div style="height: 18px;">脚本:</div>
+        <div>
+            <textarea id="source" style="width: 572px; height: 300px;"></textarea>
+        </div>
+    </div>
+    <div style="height: 60px; line-height: 60px; text-align: center;">
+        <input type="button" class="button" value=" 执 行 " onclick="window.run();"/>&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="button" class="button" value=" 关 闭 " onclick="window.close();"/>
+    </div>
+</div>
+</body>
+</html>

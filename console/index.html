@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+ * Skin Framework v1.0.0
+ * Copyright (c) 2010 xuesong.net
+ * 
+ * mailto: xuesong.net@163.com
+ * Date: 2010-04-28 10:24:21
+ * Revision: 1012
+-->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Cache-Control" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<title>Console</title>
+<script type="text/javascript">
+//<![CDATA[
+var Console = {};
+
+Console.setup = function(console)
+{
+    var target = document.getElementById("ConsoleMenuFrame")
+
+    if(target != null)
+    {
+        target = target.contentWindow;
+
+        if(target != null && target.Console != null)
+        {
+            target.Console.setup(console);
+        }
+    }
+}
+
+function onFrameLoaded(frame)
+{
+    var id = frame.id;
+
+    if(id == "ConsoleMenuFrame")
+    {
+        document.getElementById("ConsoleMainFrame").src = "console.html";
+    }
+    else if(id == "ConsoleMainFrame")
+    {
+        if(frame.contentWindow != null && frame.contentWindow.Console != null)
+        {
+            window.logger = frame.contentWindow.logger;
+            Console.setup(frame.contentWindow.Console);
+        }
+    }
+}
+//]]>
+</script>
+</head>
+<frameset id="ConsoleTopFrame" border="0" frameborder="no" bordercolor="#c0c0c0" framespacing="0" rows="30, *">
+    <frame id="ConsoleMenuFrame" src="menu.html" scrolling="auto" onload="onFrameLoaded(this)"></frame>
+    <frame id="ConsoleMainFrame" src="" scrolling="auto" onload="onFrameLoaded(this)"></frame>
+</frameset>
+<noframes>
+<body style="margin: 0px; padding: 0px;">
+<h1>对不起，您的浏览器不支持框架</h1>
+</body>
+</noframes>
+</html>

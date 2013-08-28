@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>test</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Cache-Control" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<link rel="stylesheet" type="text/css" href="console/css/console.css"/>
+<style type="text/css">
+body{font-size: 14px;}
+div.pagebar{clear: both;}
+div.pagebar a{float: left; margin-left: 4px; padding: 0px 4px; height: 20px; display: block; text-decoration: none; cursor: none;}
+div.pagebar a.block{float: left; margin-left: 4px; padding: 0px 4px; height: 20px; border: 1px solid #c0c0c0; display: block; text-decoration: none; cursor: pointer;}
+div.pagebar a.active{background: #c0c0c0;}
+div.pagebar input{width: 30px;}
+h3{margin-top: 10px;}
+</style>
+<script type="text/javascript" src="console/js/console.js"></script>
+<script type="text/javascript" src="jstest.min.js"></script>
+<script type="text/javascript" src="app.taglib.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+var ScriptManager = {};
+
+ScriptManager.getScript = function(name){
+    var list = document.getElementsByTagName("script");
+
+    if(list != null)
+    {
+        for(var i = 0, length = list.length; i < length; i++)
+        {
+            if(list[i].getAttribute("name") == name)
+            {
+                return list[i].text;
+            }
+        }
+    }
+
+    return null;
+};
+
+var UserManager = {};
+
+UserManager.getUserList = function(pageNum, pageSize){
+    var userList = [];
+
+    for(var i = 0; i < pageSize; i++)
+    {
+        var index = (pageNum - 1) * pageSize + i + 1;
+        userList[i] = {"userName": "test" + index, "userAge": (21 + i), "birthday": new Date()};
+    }
+
+    return userList;
+};
+
+UserManager.getUserCount = function(){
+    return 853;
+};
+
+function test1(pageNum, pageSize)
+{
+    var userList = UserManager.getUserList(pageNum, pageSize);
+    var userCount = UserManager.getUserCount();
+
+    var context = {};
+    context["userList"] = userList;
+    context["userCount"] = userCount;
+    context["pageNum"] = pageNum;
+    context["pageSize"] = pageSize;
+
+    var writer = new com.skin.io.StringWriter();
+
+    /**
+     * templateContext应该定义为全局静态变量, templateContext对Template对象具有缓存功能
+     * TemplateContext对象的构造函数为function(home, expire)
+     * home: 当前上下文的工作目录, 在客户端浏览器环境这个参数基本不用, 预留给服务端js用, 例如node.js环境，在服务端环境可以用来确保被include的页面是在home目录下
+     * expire: 模板对象的有效期，以秒为单位。0表示不缓存，每次都重新编译。
+     */
+    var templateContext = new com.skin.ayada.template.TemplateContext("/", 0);
+
+    /**
+     * 显示源文件内容
+     */
+    document.getElementById("source").value = ScriptManager.getScript("source1");
+
+    templateContext.execute("source1", context, writer);
+    return writer.toString();
+};
+
+function runTest(pageNum, pageSize)
+{
+    var result = test1(pageNum, pageSize);
+    document.getElementById("result").value = result;
+    document.getElementById("userList").innerHTML = result;
+}
+
+/* 页面片段相关处理逻辑 */
+com.mytest.action = {};
+com.mytest.action.HelloAction = {
+    execute: function(pageContext, parameters){
+        /**
+         * pageContext只能获取父页面的数据, 此处如果往PageContext里面放数据，只有父页面能够看到，当前绑定的页面看不到
+         * 通过返回值向当前绑定的页面传递数据
+         */
+        return {"actionMessage": "com.mytest.action.HelloAction - a: " + parameters["a"] + ", b: " + parameters["b"]};
+    }
+};
+
+window.onload = function(){
+    logger.debug("console is ready !");
+
+    /* 添加自定义标签 */
+    com.skin.ayada.jstl.TagLibraryFactory.setup("app:scrollpage", com.mytest.taglib.ScrollPageTag);
+    com.skin.ayada.jstl.TagLibraryFactory.setup("app:cache", com.mytest.taglib.CacheTag);
+
+    /**
+     * 重写获取资源方法
+     * 在服务端环境下可以使用home检查path是否在home目录下，如果不是那么应该抛出异常
+     * 客户端浏览器环境不需要检查，因此直接根据path返回源文件内容
+     */
+    com.skin.ayada.template.TemplateFactory.getSource = function(home, path, encoding){
+        return ScriptManager.getScript(path);
+    };
+
+    document.getElementById("result").value = "";
+};
+//]]>
+</script>
+</head>
+<body>
+<div style="width: 980px; margin-left: 20px;">
+    <table>
+        <tr>
+            <td>
+                <div class="menubar">Source</div>
+                <div><textarea id="source" style="width: 480px; height: 200px; overflow: scroll;"></textarea></div>
+            </td>
+            <td>
+                <div class="menubar">Result</div>
+                <div><textarea id="result" style="width: 480px; height: 200px; overflow: scroll;"></textarea></div>
+            </td>
+        </tr>
+    </table>
+    <div>
+        <input type="button" class="button" value=" run " onclick="runTest(1, 7);"/>
+    </div>
+    <div style="height: 20px;"></div>
+    <div class="menubar">
+        <input type="button" class="button" value=" 刷 新 " onclick="window.location.reload();"/>
+        <input type="button" class="button" value=" 清 空 " onclick="Console.clear();"/>
+        <input type="button" class="button" value=" 显 示 " onclick="Console.open();"/>
+        <input type="button" class="button" value=" 关 闭 " onclick="Console.close();"/>
+        <input type="button" class="button" value=" 测 试 " onclick="Console.println('console is ready !');"/>
+        <input type="button" class="button" value=" 全 选 " onclick="Console.select();"/>
+        <input type="button" class="button" value=" 滚 动 " onclick="Console.setScroll();"/>
+    </div>
+    <div id="console" class="console" style="height: 300px; border: 1px solid #99bbe8; overflow: scroll;"></div>
+    <div style="height: 20px;"></div>
+    <div id="userList" style="text-align: left;"></div>
+</div>
+
+<!-- Template -->
+<script name="source1" type="text/template">
+<h3>System Time: <fmt:formatDate value="${new Date()}" pattern="yyyy-MM-dd HH:mm:ss SSS"/></h3>
+
+<h3>cacheTag test</h3>
+<app:cache key="cache1" expires="10">
+    <fmt:formatDate value="${new Date()}" pattern="yyyy-MM-dd HH:mm:ss SSS"/>
+</app:cache>
+
+<h3>ChooseTag test</h3>
+<c:choose>
+    <c:when test="${userList.length > 6}"><div>test1</div></c:when>
+    <c:when test="${userList.length > 7}"><div>test2</div></c:when>
+    <c:otherwise><div>test3</div></c:otherwise>
+</c:choose>
+
+<h3>OutTag test</h3>
+<c:out escapeXml="true"><div>this is content</div></c:out>
+<c:out><div>this is content</div></c:out>
+
+<h3>CommentTag test</h3>
+<c:comment>
+    <div>Hello World !</div>
+    <c:out><div>this is content</div></c:out>
+</c:comment>
+
+<h3>EL test</h3>
+<div>${com.skin.util.StringUtil.trim("  123   ")}</div>
+
+<h3>Include test</h3>
+<t:include file="includePage1"/>
+
+<h3>ActionTag test</h3>
+<c:action className="com.mytest.action.HelloAction" method="execute" page="actionPage1">
+    <c:param name="a" value="1"/>
+    <c:param name="b">2</c:param>
+</c:action>
+
+<h3>ForEachTag test1</h3>
+<c:forEach begin="1" end="3" step="1" var="myvar" varStatus="status">myvar: ${myvar}&nbsp;&nbsp;</c:forEach>
+
+<h3>ForEachTag test2</h3>
+<c:forEach items="1,2,3" var="myvar" varStatus="status">myvar: ${myvar}&nbsp;&nbsp;</c:forEach>
+
+<h3>ForEachTag test3</h3>
+<c:set var="rows" value="${Math.floor((userList.length + 1) / 2)}"/>
+<table border="1">
+    <c:forEach items="${userList}" var="user" varStatus="status">
+        <c:set var="rowNum" value="${Math.floor((status.index + 2) / 2)}"/>
+        <!-- rowNum: ${rowNum}, rows: ${rows} -->
+        <c:if test="${(status.index % 2) == 0}"><tr></c:if>
+        <c:if test="${rowNum < rows}"><td style="width: 300px;"></c:if>
+        <c:if test="${rowNum >= rows}">
+            <td style="width: 200px;" test="1">
+        </c:if>
+        <div>rows: ${rows}, rowNum: ${rowNum}, status.index: ${status.index}</div>
+        <div>user.userName: ${user.userName}</div>
+        <div>user.birthday: <fmt:formatDate value="${user.birthday}" pattern="yyyy-MM-dd HH:mm:ss SSS"/></div>
+        </td>
+        <!-- ${status.index} ${(status.index + 1) % 2} -->
+        <c:if test="${(status.index + 1) % 2 == 0}"></tr></c:if>
+    </c:forEach>
+    <c:if test="${userList.length % 2 != 0}"><td class="nbb">&nbsp;</td></tr></c:if>
+</table>
+
+<div style="height: 20px;"></div>
+<div class="scrollpage">
+    <app:scrollpage pageNum="${pageNum}" pageSize="${pageSize}" total="${userCount}" className="pagebar" href="javascript: runTest(%s, ${pageSize})"/>
+</div>
+</script>
+
+<!-- Template -->
+<script name="includePage1" type="text/template">
+<h3>This is "includePage1" content!</h3>
+<p>这是一个被包含的页面，被包含的页面会和父页面一起编译。因此你可以访问父页面的对象！</p>
+<table border="1">
+    <tr>
+        <td colspan="3" style="background-color: #c0c0c0;">UserList</td>
+    </tr>
+    <tr>
+        <td>Name</td>
+        <td>Age</td>
+        <td>Birthday</td>
+    </tr>
+    <c:forEach items="${userList}" var="user" varStatus="status">
+        <tr>
+            <td>${user.userName}</td>
+            <td>${user.userAge}</td>
+            <td><fmt:formatDate value="${user.birthday}" pattern="yyyy-MM-dd"/></td>
+        </tr>
+    </c:forEach>
+</table>
+</script>
+
+<!-- Template -->
+<script type="text/template" name="actionPage1">
+<h3>This is "actionPage1" content!</h3>
+<p>这是一个单独的页面，它使用一个全新的PageContext对象进行渲染，因此在这个页面你不能访问父页面的对象！</p>
+<p>actionMessage: ${actionMessage}</p>
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+javascript模板引擎之EL表达式
+
+http://blog.csdn.net/xuesong123/article/details/8100007
+javascript 模板 javascript-jstl
+
+javascript模板引擎中对EL表达式的支持一直都很麻烦，主要原因是因为变量是存在另外的一个类似于map的对象，
+要执行一个表达式，就必须得解释整个表达式，并扫描所有变量，对每一个变量依次从作用域中查找，最后计算结果。
+下面介绍的方法使用预编译机制来避免解释表达式。
+
+我在前篇文章中曾经介绍了一个使用jstl语法的javascript版的模板引擎，它同时支持两种语法：
+1. jstl语法的模板语言
+2. 原生的javascript语法
+同时还支持el表达式，但是对于el表达式的支持也不是太好，因为它对el表达式的写法有特殊要求，例如：
+<span>userName: ${user.userName}</span>
+<span>userAge: ${user.userAge}</span>
+需要写成
+<span>userName: ${this.user.userName}</span>
+<span>userAge: ${this.user.userAge}</span>
+
+以下内容都将以上面的文档片段为例.
+具体原因我在前篇文章中已经做过介绍，此处再赘述一遍：对于一篇文档中所有的el表达式，编译器会生成一个el表达式表，大概的代码会是这样的：
+var exprTable = {
+    expr1: function(){
+        return this.user.userName;
+    },
+    expr2: function(){
+        return this.user.userAge;
+    }
+};
+
+当要执行一个el表达式对象的时候，会从el表达式表中查找对应的表达式， 通过name引用，一个el表达式对象的结构如下:
+var Expression = function(name){
+    this.name = name;
+};
+
+var ExpressionContext = function(exprTable){
+    this.exprTable = exprTable;
+};
+
+ExpressionContext.prototype.eval = function(expression, pageContext){
+    var expr = this.exprTable[expression.name];
+    return expr.apply(pageContext);
+};
+
+var pageContext = {};
+
+pageContext.user = {userName: "test1", userAge: 21};
+var expressionContext = new ExpressionContext(exprTable);
+var result = expressionContext.eval(new Expression("expr1"));
+
+1. 首先，一个el表达式被编译成了一个函数, 这个函数的主体直接返回el表达式.
+2. 在pageContext上执行这个函数，返回的结果就是这个el表达式的结果.
+所有的el表达式都是在编译期被编译成了函数，可以做到只编译一次，多次运行。
+
+上面介绍的方法的一个很大的缺陷就是要求el表达式中所有变量都必须以this开头。下面的方法通过javascript本身的机制避免使用this关键字。
+javascript有个关键字with，我们就使用它来避免在表达式中使用this，而且上面的代码仅需要做一点点改动：
+
+var exprTable = {
+    expr1: function(){
+        with(this)
+        {
+            return user.userName;
+        }
+    },
+    expr1: function(){
+        with(this)
+        {
+            return user.userAge;
+        }
+    }
+};
+
+下面是一段测试代码，测试代码没有使用预编译机制：
+var pageContext = {};
+pageContext.user = {"userName": "test1", "age": 21};
+pageContext.userList = [
+    {"name": "test1", "age": 21},
+    {"name": "test2", "age": 22},
+    {"name": "test3", "age": 23},
+    {"name": "test4", "age": 24},
+    {"name": "test5", "age": 25}
+];
+
+var ExpressionContext = {};
+
+ExpressionContext.evaluate = function(expression, pageContext){
+    var f = new Function("x", "with(this){return " + expression +  "}");
+    return f.apply(pageContext);
+};
+
+var result = ExpressionContext.evaluate("user.userName", pageContext);
+alert(result);

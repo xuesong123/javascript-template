@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>jQueryTest</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Cache-Control" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<script type="text/javascript" src="jstest.min.js"></script>
+<script type="text/javascript" src="app.taglib.js"></script>
+<script type="text/javascript" src="lib/jquery-1.4.2.min.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+var ScriptManager = {};
+ScriptManager.getScript = function(name){
+    var list = document.getElementsByTagName("script");
+
+    if(list != null)
+    {
+        for(var i = 0, length = list.length; i < length; i++)
+        {
+            if(list[i].getAttribute("name") == name)
+            {
+                return list[i].text;
+            }
+        }
+    }
+
+    return null;
+};
+
+/* 页面片段相关处理逻辑 */
+com.mytest.action = {};
+com.mytest.action.HelloAction = {
+    execute: function(pageContext, parameters){
+        /**
+         * pageContext只能获取父页面的数据, 此处如果往PageContext里面放数据，只有父页面能够看到，当前绑定的页面看不到
+         * 通过返回值向当前绑定的页面传递数据
+         */
+        return {"actionMessage": "com.mytest.action.HelloAction - a: " + parameters["a"] + ", b: " + parameters["b"]};
+    }
+};
+
+/**
+ * 重写获取资源方法
+ * 在服务端环境下可以使用home检查path是否在home目录下，如果不是那么应该抛出异常
+ * 客户端浏览器环境不需要检查，因此直接根据path返回源文件内容
+ */
+com.skin.ayada.template.TemplateFactory.getSource = function(home, path, encoding){
+    return ScriptManager.getScript(path);
+};
+
+jQuery.fn.extend({
+    doAction: function(){
+        jQuery(this).each(function(){
+            var name = jQuery(this).attr("name");
+            var action = jQuery(this).attr("action");
+            var method = jQuery(this).attr("method");
+            var update = jQuery(this).attr("update");
+            var params = jQuery(this).attr("params");
+
+            if(name == null || action == null || update == null)
+            {
+                return false;
+            }
+
+            if(params != null)
+            {
+                params = (new Function("return (" + params + ");"))();
+            }
+
+            if(params == null)
+            {
+                params = {};
+            }
+
+            var writer = new com.skin.io.StringWriter();
+            var templateContext = new com.skin.ayada.template.TemplateContext("/", 0);
+            var pageContext = com.skin.ayada.runtime.JspFactory.getPageContext(templateContext, writer);
+            var context = com.skin.ayada.taglib.ActionDispatcher.dispatch(pageContext, params, action, method);
+            pageContext.include(name, context);
+            document.getElementById(update).innerHTML = writer.toString();
+        });
+    }
+});
+
+jQuery(function(){
+    jQuery("#run").click(function(){
+        jQuery("script[type=text/template]").doAction();
+    });
+});
+//]]>
+</script>
+</head>
+<body>
+<h3>这个页面展示了在模板上定义action, 在模板被渲染之前先调用定义的action，通过action向模板注入数据，然后再渲染模板。</h3>
+<input id="run" type="button" value=" run " onclick=""/>
+<div id="mydiv1"></div>
+<div id="mydiv2"></div>
+
+<!-- Template -->
+<script type="text/template" name="demoPage1" action="com.mytest.action.HelloAction" method="execute" params="{a: 1, b: 2}" update="mydiv1">
+<h3>1 Run Result:</h3>
+<p>actionMessage: ${actionMessage} </p>
+</script>
+
+<!-- Template -->
+<script type="text/template" name="demoPage2" action="com.mytest.action.HelloAction" method="execute" params="{a: 1, b: 2}" update="mydiv2">
+<h3>2 Run Result:</h3>
+<p>actionMessage: ${actionMessage} </p>
+</script>
+</body>
+</html>

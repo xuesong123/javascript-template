@@ -1,0 +1,44 @@
+html,body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,p,blockquote,th,td{margin: 0px; padding: 0px;}
+html,body{font-size: 12px; color: #000000;}
+body,html,img{border: 0px;}
+a,img{margin: 0px; padding: 0px;}
+input.text{
+    height: 18px;
+    padding-left: 2px;
+    border: 1px solid #809DB9;
+    line-height: 18px;
+}
+input.button{
+    margin: 0px 4px;
+    padding-left: 2px;
+    height: 20px;
+    border: 1px solid #809DB9;
+    line-height: 18px;
+}
+.w30{width: 30px;}
+.w60{width: 60px;}
+.h20{height: 20px;}
+.hide{display: none;}
+.show{display: block;}
+
+div.menubar{
+    margin: 0px; padding: 4px; border: 1px solid #99bbe8; background-color: #bbccdd;
+}
+
+div.console{
+    margin: 0px;
+    padding: 4px;
+    line-height: 22px;
+    background-color: #ffffff;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+div.console p{
+    margin: 0px; padding: 0px; line-height: 18px;
+}
+
+div.console p span.time{
+    font-weight: bold;
+    color: #0000ff;
+}
