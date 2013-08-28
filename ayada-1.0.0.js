@@ -2373,7 +2373,7 @@ var com = (function(){
 
     /**
      * @param stack
-     * @param document
+     * @param list
      * @param node
      */
     TemplateCompiler.prototype.pushNode = function(stack, list, node){
@@ -2395,7 +2395,7 @@ var com = (function(){
 
     /**
      * @param stack
-     * @param document
+     * @param list
      * @param nodeName
      */
     TemplateCompiler.prototype.popNode = function(stack, list, nodeName){
@@ -2426,8 +2426,9 @@ var com = (function(){
 
     /**
      * @param stack
-     * @param document
+     * @param list
      * @param text
+     * @param lineNumber
      */
     TemplateCompiler.prototype.pushTextNode = function(stack, list, text, lineNumber){
         var parent = stack.peek();
@@ -2550,11 +2551,14 @@ var com = (function(){
 
         if(tagLibrary != null)
         {
-            tagLibrary.setup(name, className);
+            var library = {};
+            library[name] = className;
+            tagLibrary.setup(library);
         }
     };
 
     /**
+     * @param prefix
      * @param node
      * @return String
      */
