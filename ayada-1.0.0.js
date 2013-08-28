@@ -1341,7 +1341,7 @@ var com = (function(){
     ExpressionContext.prototype.evaluate = function(expression){
         try
         {
-            return (new Function("with(this){return " + expression +  "}")).apply(this.pageContext.attributes);
+            return (new Function("try{with(this){return " + expression +  "}}catch(e){} return null;")).apply(this.pageContext.attributes);
         }
         catch(e)
         {
@@ -2151,8 +2151,8 @@ var com = (function(){
                         expr.setLength(1);
                         expr.setLineNumber(this.lineNumber);
                         expr.append(expression.join(""));
-                        /* 表达式预编译 */
-                        expr.eval = new Function("pageContext", "with(pageContext.attributes){return " + expression.join("") +  ";}");
+                        /* 表达式预编译 */ 
+                        expr.eval = new Function("pageContext", "try{with(pageContext.attributes){return " + expression.join("") +  ";}}catch(e){} return null;");
                         list.push(expr);
                         break;
                     }
