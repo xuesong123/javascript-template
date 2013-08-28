@@ -3071,7 +3071,7 @@ var com = (function(){
      * This software is the proprietary information of Skin, Inc.
      * Use is subject to license terms.
      */
-    var TemplateFactory = com.skin.ayada.template.TemplateFactory = com.skin.framework.Class.getInstance(function(){});
+    var TemplateFactory = com.skin.ayada.template.TemplateFactory = com.skin.framework.Class.getInstance();
 
     /**
      * @param home
@@ -4661,7 +4661,7 @@ var com = (function(){
      * This software is the proprietary information of Skin, Inc.
      * Use is subject to license terms.
      */
-    var ActionDispatcher = com.skin.ayada.taglib.ActionDispatcher = com.skin.framework.Class.getInstance(function(){});
+    var ActionDispatcher = com.skin.ayada.taglib.ActionDispatcher = com.skin.framework.Class.getInstance();
 
     /**
      * @param pageContext
