@@ -5,6 +5,20 @@ var http = require("http");
 var httpd = require("./httpd");
 
 /**
+ * $RCSfile: StringUtil.js,v $$
+ * $Revision: 1.1 $
+ * $Date: 2012-10-18 $
+ *
+ * Copyright (C) 2008 Skin, Inc. All rights reserved.
+ * This software is the proprietary information of Skin, Inc.
+ * Use is subject to license terms.
+ */
+var StringUtil = {};
+StringUtil.startsWith = function(source, search){
+    return (source.length >= search.length && source.substring(0, search.length) == search)
+};
+
+/**
  * $RCSfile: ArrayUtil.js,v $$
  * $Revision: 1.1 $
  * $Date: 2012-10-18 $
@@ -242,7 +256,6 @@ WebApplicationFactory.create = function(host, home, path){
     servletContext.webApplication = webApplication;
     servletContext.defaultServlet = httpd.create(host, home, path);
     servletContext.jspServlet = new JspServlet();
-
     return webApplication;
 };
 
@@ -360,7 +373,6 @@ WebApplication.prototype.dispatch = function(req, res){
     /**
      * don't check contextPath
      */
-
     try
     {
         res.setHeader("Server", "Httpd/1.1");
@@ -369,8 +381,24 @@ WebApplication.prototype.dispatch = function(req, res){
         var request = this.getRequest(req, res);
         var response = this.getResponse(req, res);
         var servletChain = this.servletContext.getServletChain(url.pathname);
-        this.sessionContext.update(request, response);
+        var requestURI = request.requestURI;
+
+        if(StringUtil.startsWith(requestURI.toUpperCase(), "/WEB-INF"))
+        {
+            response.writeHead(403, "Forbidden", {"Content-Type": "text/plain"});
+            response.end();
+            return;
+        }
+
+        if(StringUtil.startsWith(requestURI.toUpperCase(), "/META-INF"))
+        {
+            response.writeHead(403, "Forbidden", {"Content-Type": "text/plain"});
+            response.end();
+            return;
+        }
+
         request.setAttribute("servlet_request_type", "REQUEST");
+        this.sessionContext.update(request, response);
 
         if(request.headers["content-type"] == "application/x-www-form-urlencoded")
         {
