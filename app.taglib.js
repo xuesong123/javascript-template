@@ -1,8 +1,19 @@
 (function(){
+    if(typeof(module) != "undefined" && typeof(module.exports) != "undefined")
+    {
+        com = require("./ayada-1.0.0.min.js").com;
+    }
+
+    if(typeof(com) == "undefined")
+    {
+        com = {};
+    }
+
     if(typeof(com.mytest) == "undefined")
     {
         com.mytest = {};
     }
+
     if(typeof(com.mytest.taglib) == "undefined")
     {
         com.mytest.taglib = {};
@@ -426,3 +437,12 @@
         return this.expires;
     };
 })();
+
+/**
+ * nodejs support
+ */
+if(typeof(module) != "undefined")
+{
+    module.exports.ScrollPageTag = com.mytest.taglib.ScrollPageTag;
+    module.exports.CacheTag = com.mytest.taglib.CacheTag;
+}

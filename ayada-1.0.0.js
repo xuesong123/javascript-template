@@ -4727,3 +4727,17 @@ var Ayada = (function(){
     Ayada.ActionDispatcher = com.skin.ayada.taglib.ActionDispatcher;
     return Ayada;
 })();
+
+/**
+ * nodejs support
+ */
+if(typeof(module) != "undefined")
+{
+    module.exports.com = com;
+    module.exports.StringWriter = com.skin.io.StringWriter;
+    module.exports.TemplateContext = com.skin.ayada.template.TemplateContext;
+    module.exports.TagLibraryFactory = com.skin.ayada.jstl.TagLibraryFactory;
+    module.exports.TemplateFactory = com.skin.ayada.template.TemplateFactory;
+    module.exports.JspFactory = com.skin.ayada.runtime.JspFactory;
+    module.exports.ActionDispatcher = com.skin.ayada.taglib.ActionDispatcher;
+}
