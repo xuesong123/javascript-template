@@ -123,8 +123,8 @@ var com = (function(){
     };
 
     /**
-     * @param prototype
      * @param instance
+     * @param prototype
      * @retur Object
      */
     Class.$super = /* private */ function(instance, prototype){
@@ -285,12 +285,13 @@ var com = (function(){
 
     /**
      * @param source
-     * @return boolean
+     * @return String
      */
     StringUtil.trim = function(source){return (source != null ? source.replace(/(^\s*)|(\s*$)/g, "") : "");};
 
     /**
      * @param source
+     * @param search
      * @return boolean
      */
     StringUtil.startsWith = function(source, search){
@@ -304,6 +305,7 @@ var com = (function(){
 
     /**
      * @param source
+     * @param search
      * @return boolean
      */
     StringUtil.endsWith = function(source, search){
@@ -838,9 +840,9 @@ var com = (function(){
     NodeType.CDATA   = 4;
     NodeType.EXPRESSION = 2013;
 
-    NodeType.EXPR_NAME    = "#expr";
     NodeType.DATA_NAME    = "#data";
     NodeType.TEXT_NAME    = "#text";
+    NodeType.EXPR_NAME    = "#expr";
     NodeType.CDATA_NAME   = "<![CDATA[";
     NodeType.COMMENT_NAME = "#comment";
     NodeType.PAIR_CLOSED  = 2;
@@ -2481,11 +2483,6 @@ var com = (function(){
             throw {"name": "RuntimeException", "message": "t:include error: attribute 'file' not exists !"};
         }
 
-        if(this.file == null && path.charAt(0) != "/")
-        {
-            throw {"name": "RuntimeException", "message": "t:include error: file must be starts with '/'"};
-        }
-
         if(this.home == null)
         {
             this.home = ".";
@@ -2875,6 +2872,7 @@ var com = (function(){
 
     /**
      * @param statement
+     * @param pageContext
      * @return int
      */
     DefaultExecutor.doStartTag = function(statement, pageContext){
@@ -4702,6 +4700,7 @@ var com = (function(){
             return null;
         }
     };
+
     ActionDispatcher.getInstance = function(className){
         return (new Function("var type = typeof(" + className + "); if(type == \"function\"){return new " + className + "();}else{return " + className + "}"))();
     };
