@@ -39,6 +39,7 @@
     };
 
     HelloTag.prototype.doEndTag = function(){
+        // console.log("1 HelloTag.doEndTag....");
         this.getPageContext().getOut().print("Hello, " + this.message + " !");
         return com.skin.ayada.tagext.Tag.EVAL_PAGE;
     };

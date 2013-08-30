@@ -18,13 +18,6 @@ july.JspServlet.prototype.execute = function(request, response, servletChain){
  */
 var webApplication = july.WebApplicationFactory.create("localhost", "webapp", "/");
 var servletContext = webApplication.servletContext;
-
-/**
- * scan ${HOME}/WEB-INF/lib
- * load ${HOME}/WEB-INF/lib/*.js, webapp/WEB-INF/lib/* /*.js not loaded!
- */
-servletContext.load();
-
 var server = (function(){
     return http.createServer(function(request, response){
         try
@@ -37,6 +30,13 @@ var server = (function(){
         }
     });
 })();
+
+/**
+ * scan ${HOME}/WEB-INF/lib
+ * load ${HOME}/WEB-INF/lib/*.js
+ */
+servletContext.load();
+servletContext.watch();
 
 server.listen(80, "localhost");
 console.log("server start on port: 80");

@@ -108,6 +108,7 @@ templateFilter.init = function(servletContext){
  * @Override
  */
 templateFilter.service = function(request, response, servletChain){
+    // console.log("1 TemplateFilter.service...");
     /* filter dispatcher type */
     if(request.getAttribute("servlet_request_dispatcher") != "FORWARD")
     {

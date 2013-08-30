@@ -669,6 +669,36 @@ ServletContext.prototype.getRequestDispatcher = function(path){
 ServletContext.prototype.load = function(){
     var lib = path.join(this.getRealPath("/"), "WEB-INF/lib");
 
+    console.log("********************************************");
+    console.log("*                                          *");
+    console.log("*           ServletContext.load            *");
+    console.log("*                                          *");
+    console.log("********************************************");
+    console.log("Load ServletContext: " + this.home + " - " + lib);
+
+    var cache = require.cache;
+
+    for(var i in cache)
+    {
+        if(StringUtil.startsWith(i, this.getRealPath("/")))
+        {
+            delete require.cache[i];
+            console.log("DELETE MODUL: " + i);
+        }
+    }
+
+    /**
+     * delete require cache
+     */
+    FileIterator.each(lib, function(file){
+        var stats = fs.statSync(file);
+
+        if(stats.isFile())
+        {
+            delete require.cache[file];
+        }
+    });
+
     if(fs.existsSync(lib) == true)
     {
         var list = fs.readdirSync(lib);
@@ -682,8 +712,8 @@ ServletContext.prototype.load = function(){
             {
                 if(fileName.length >= 3 && fileName.substring(fileName.length - 3).toLowerCase() == ".js")
                 {
-                    console.log("** load " + fileName);
-                    var servlets = require(path.join(lib, fileName)).servlets;
+                    var filePath = path.join(lib, fileName);
+                    var servlets = require(filePath).servlets;
 
                     if(servlets != null)
                     {
@@ -691,7 +721,6 @@ ServletContext.prototype.load = function(){
                         {
                             var servlet = servlets[name];
                             this.set(name, servlet.pattern, servlet.servlet);
-                            console.log("    ## " + fileName + ": " + name + " - " + servlet.pattern);
                         }
                     }
                 }
@@ -717,10 +746,82 @@ ServletContext.prototype.load = function(){
 };
 
 /**
- * TODO: reload
+ * reload all servlet
  */
 ServletContext.prototype.reload = function(){
-    
+    this.context = {};
+    this.load();
+};
+
+ServletContext.prototype.watch = function(){
+    var lib = path.join(this.getRealPath("/"), "WEB-INF/lib");
+
+    if(fs.existsSync(lib) == true)
+    {
+        var instance = this;
+
+        FileIterator.each(lib, function(file){
+            var stats = fs.statSync(file);
+
+            if(stats.isDirectory())
+            {
+                console.log("WATCH: " + file);
+
+                fs.watch(file, function(event, fileName){
+                    /* console.log("WATCH EVENT: " + event + " - file: " + fileName); */
+
+                    if(instance.watchTimer != null)
+                    {
+                        clearTimeout(instance.watchTimer);
+                    }
+
+                    instance.watchTimer = setTimeout(function(){instance.reload();}, 10000);
+                });
+            }
+        });
+    }
+};
+
+var FileIterator = {};
+
+FileIterator.each = function(dir, handler){
+    if(fs.existsSync(dir) == false)
+    {
+        return;
+    }
+
+    handler(dir);
+
+    var stats = fs.statSync(dir);
+
+    if(stats.isFile())
+    {
+        return;
+    }
+
+    var list = [];
+    var dirs = [dir];
+
+    for(var i = 0; i < dirs.length; i++)
+    {
+        list = fs.readdirSync(dirs[i]);
+
+        for(var j = 0, length = list.length; j < length; j++)
+        {
+            var filePath = path.join(dirs[i], list[j]);
+            var stats = fs.statSync(filePath);
+
+            if(stats.isDirectory())
+            {
+                dirs.push(filePath);
+                handler(filePath);
+            }
+            else if(stats.isFile())
+            {
+                handler(filePath);
+            }
+        }
+    }
 };
 
 /**
