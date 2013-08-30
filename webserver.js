@@ -438,13 +438,8 @@ WebApplication.prototype.dispatch = function(req, res){
 
     if(exception != null)
     {
-        throw exception;
-    }
-
-    if(exception != null)
-    {
         response.writeHead(500, "Internal Server Error", {"Content-type": "text/html"});
-        response.end("<h4>" + exception.toString() + "</h4>");
+        response.end("<h4>" + exception.name + ": " + exception.message + "</h4>");
         return;
     }
 

@@ -20,14 +20,7 @@ var webApplication = july.WebApplicationFactory.create("localhost", "webapp", "/
 var servletContext = webApplication.servletContext;
 var server = (function(){
     return http.createServer(function(request, response){
-        try
-        {
-            webApplication.dispatch(request, response);
-        }
-        catch(e)
-        {
-            console.log(e.name + ": " + e.message);
-        }
+        webApplication.dispatch(request, response);
     });
 })();
 
