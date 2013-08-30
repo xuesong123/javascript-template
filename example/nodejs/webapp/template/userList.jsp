@@ -19,6 +19,8 @@ h3{margin-top: 10px;}
 </head>
 <body>
 <t:include file="/include/common/header.jsp"/>
+<app:hello message="HelloTag"/>
+
 <h3>System Time: <fmt:formatDate value="${new Date()}" pattern="yyyy-MM-dd HH:mm:ss SSS"/></h3>
 
 <h3>cacheTag test</h3>

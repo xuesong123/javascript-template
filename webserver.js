@@ -666,8 +666,61 @@ ServletContext.prototype.getRequestDispatcher = function(path){
 /**
  * TODO: reload
  */
-ServletContext.prototype.reload = function(){
+ServletContext.prototype.load = function(){
+    var lib = path.join(this.getRealPath("/"), "WEB-INF/lib");
 
+    if(fs.existsSync(lib) == true)
+    {
+        var list = fs.readdirSync(lib);
+
+        for(var i = 0, length = list.length; i < length; i++)
+        {
+            var fileName = list[i];
+            var stats = fs.statSync(path.join(lib, fileName));
+
+            if(stats.isFile())
+            {
+                if(fileName.length >= 3 && fileName.substring(fileName.length - 3).toLowerCase() == ".js")
+                {
+                    console.log("** load " + fileName);
+                    var servlets = require(path.join(lib, fileName)).servlets;
+
+                    if(servlets != null)
+                    {
+                        for(var name in servlets)
+                        {
+                            var servlet = servlets[name];
+                            this.set(name, servlet.pattern, servlet.servlet);
+                            console.log("    ## " + fileName + ": " + name + " - " + servlet.pattern);
+                        }
+                    }
+                }
+            }
+            else if(stats.isDirectory())
+            {
+            }
+        }
+
+        /**
+         * init servlet
+         */
+        for(var name in this.context)
+        {
+            var servlet = this.context[name].servlet;
+
+            if(servlet.init != null)
+            {
+                servlet.init(this);
+            }
+        }
+    }
+};
+
+/**
+ * TODO: reload
+ */
+ServletContext.prototype.reload = function(){
+    
 };
 
 /**

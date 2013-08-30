@@ -1,7 +1,7 @@
 (function(){
     if(typeof(module) != "undefined" && typeof(module.exports) != "undefined")
     {
-        com = require("./ayada-1.0.0.min.js").com;
+        com = require("../ayada/ayada-1.0.0.min.js").com;
     }
 
     if(typeof(com) == "undefined")
@@ -39,7 +39,7 @@
     };
 
     HelloTag.prototype.doEndTag = function(){
-        this.getPageContext().getOut().print("Hello, com.mytest.taglib.HelloTag !");
+        this.getPageContext().getOut().print("Hello, " + this.message + " !");
         return com.skin.ayada.tagext.Tag.EVAL_PAGE;
     };
 })();
