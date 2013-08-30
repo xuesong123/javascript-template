@@ -109,7 +109,7 @@ templateFilter.init = function(servletContext){
  */
 templateFilter.service = function(request, response, servletChain){
     /* filter dispatcher type */
-    if(request.getAttribute("servlet_request_type") != "FORWARD")
+    if(request.getAttribute("servlet_request_dispatcher") != "FORWARD")
     {
         servletChain.doChain(request, response);
         return;

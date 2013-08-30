@@ -397,7 +397,7 @@ WebApplication.prototype.dispatch = function(req, res){
             return;
         }
 
-        request.setAttribute("servlet_request_type", "REQUEST");
+        request.setAttribute("servlet_request_dispatcher", "REQUEST");
         this.sessionContext.update(request, response);
 
         if(request.headers["content-type"] == "application/x-www-form-urlencoded")
@@ -785,7 +785,7 @@ function RequestDispatcher(servletChain){
  * @param servletChain
  */
 RequestDispatcher.prototype.forward = function(request, response, servletChain){
-    request.setAttribute("servlet_request_type", "FORWARD");
+    request.setAttribute("servlet_request_dispatcher", "FORWARD");
     this.servletChain.doChain(request, response);
 };
 
