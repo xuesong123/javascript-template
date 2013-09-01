@@ -24,12 +24,23 @@ var server = (function(){
     });
 })();
 
+process.stdin.resume();
+process.stdin.setEncoding("utf8");
+
 /**
  * scan ${HOME}/WEB-INF/lib
  * load ${HOME}/WEB-INF/lib/*.js
  */
 servletContext.load();
 servletContext.watch();
+
+process.on("exit", function(){
+    servletContext.destroy();
+});
+
+process.on("SIGINT", function(){
+    servletContext.destroy();
+});
 
 server.listen(80, "localhost");
 console.log("server start on port: 80");

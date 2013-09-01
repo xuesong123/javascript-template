@@ -1,1 +1,2 @@
-node app1.js
+@ECHO OFF
+cmd /k

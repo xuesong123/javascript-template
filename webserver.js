@@ -745,7 +745,33 @@ ServletContext.prototype.load = function(){
  */
 ServletContext.prototype.reload = function(){
     this.context = {};
+    this.destroy();
     this.load();
+};
+
+/**
+ * destroy all servlet
+ */
+ServletContext.prototype.destroy = function(){
+    console.log("********************************************");
+    console.log("*                                          *");
+    console.log("*          ServletContext.destroy          *");
+    console.log("*                                          *");
+    console.log("********************************************");
+    console.log("Destroy ServletContext: " + this.home + " - " + lib);
+
+    /**
+     * destroy servlet
+     */
+    for(var name in this.context)
+    {
+        var servlet = this.context[name].servlet;
+
+        if(servlet.destroy != null)
+        {
+            servlet.destroy();
+        }
+    }
 };
 
 ServletContext.prototype.watch = function(){
