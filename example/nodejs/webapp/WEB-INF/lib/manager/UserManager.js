@@ -13,7 +13,7 @@ var UserManager = {};
  * your business method
  */
 UserManager.getById = function(userId){
-    return {"userId": userId, "userName": "test" + userId, "userAge": (21 + userId), "birthday": new Date()};
+    return {"userId": userId, "userName": "test" + userId, "userAge": (21 + parseInt(userId)), "birthday": new Date()};
 };
 
 /**

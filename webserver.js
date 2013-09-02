@@ -677,8 +677,11 @@ ServletContext.prototype.load = function(){
     {
         if(StringUtil.startsWith(i, this.getRealPath("/")))
         {
-            delete require.cache[i];
-            console.log("DELETE MODUL: " + i);
+            if(require.cache[i] != null)
+            {
+                delete require.cache[i];
+                console.log("DELETE MODUL: " + i);
+            }
         }
     }
 
@@ -690,7 +693,11 @@ ServletContext.prototype.load = function(){
 
         if(stats.isFile())
         {
-            delete require.cache[file];
+            if(require.cache[file] != null)
+            {
+                delete require.cache[file];
+                console.log("DELETE MODUL: " + file);
+            }
         }
     });
 
@@ -773,6 +780,8 @@ ServletContext.prototype.destroy = function(){
             servlet.destroy();
         }
     }
+
+    console.log("");
 };
 
 ServletContext.prototype.watch = function(){
