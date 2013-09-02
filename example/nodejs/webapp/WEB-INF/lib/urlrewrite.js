@@ -18,6 +18,21 @@ UrlRewriteDispatcher.rules = [
     }
 ];
 
+UrlRewriteDispatcher.init = function(servletContext){
+    var rules = this.rules;
+
+    for(var i = 0, length = rules.length; i < length; i++)
+    {
+        console.log("set rule: " + rules[i].from);
+    }
+};
+
+UrlRewriteDispatcher.init = null;
+
+UrlRewriteDispatcher.service = function(request, response, servletChain){
+    this.dispatch(request, response, servletChain);
+};
+
 UrlRewriteDispatcher.dispatch = function(request, response, servletChain){
     var requestURI = request.requestURI;
     var rules = this.rules;
@@ -52,21 +67,6 @@ UrlRewriteDispatcher.dispatch = function(request, response, servletChain){
 
     servletChain.doChain(request, response, servletChain);
     return false;
-};
-
-UrlRewriteDispatcher.init = function(servletContext){
-    var rules = this.rules;
-
-    for(var i = 0, length = rules.length; i < length; i++)
-    {
-        console.log("set rule: " + rules[i].from);
-    }
-};
-
-UrlRewriteDispatcher.init = null;
-
-UrlRewriteDispatcher.service = function(request, response, servletChain){
-    UrlRewriteDispatcher.dispatch(request, response, servletChain);
 };
 
 /**
