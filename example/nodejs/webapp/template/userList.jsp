@@ -66,7 +66,7 @@ h3{margin-top: 10px;}
             <td style="width: 200px;" test="1">
         </c:if>
         <div>rows: ${rows}, rowNum: ${rowNum}, status.index: ${status.index}</div>
-        <div>user.userName: ${user.userName}</div>
+        <div>user.userName: <a href="/user/${user.userId}.html">${user.userName}</a></div>
         <div>user.birthday: <fmt:formatDate value="${user.birthday}" pattern="yyyy-MM-dd HH:mm:ss SSS"/></div>
         </td>
         <!-- ${status.index} ${(status.index + 1) % 2} -->
@@ -78,6 +78,10 @@ h3{margin-top: 10px;}
 <div style="height: 20px;"></div>
 <div class="scrollpage">
     <app:scrollpage pageNum="${pageNum}" pageSize="${pageSize}" total="${userCount}" className="pagebar" href="/user/userList.do?pageNum=%s"/>
+</div>
+
+<div class="scrollpage">
+    <app:scrollpage pageNum="${pageNum}" pageSize="${pageSize}" total="${userCount}" className="pagebar" href="/userlist/%s.html"/>
 </div>
 
 <t:include file="/include/common/footer.jsp"/>

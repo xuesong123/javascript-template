@@ -1,8 +1,4 @@
-var os = require("os");
-var fs = require("fs");
-var path = require("path");
 var http = require("http");
-var URL = require("url");
 var july = require("../../webserver.js");
 
 /**
@@ -27,20 +23,14 @@ var server = (function(){
 process.stdin.resume();
 process.stdin.setEncoding("utf8");
 
-/**
- * scan ${HOME}/WEB-INF/lib
- * load ${HOME}/WEB-INF/lib/*.js
- */
-servletContext.load();
-servletContext.watch();
-
 process.on("exit", function(){
     servletContext.destroy();
 });
 
-process.on("SIGINT", function(){
-    servletContext.destroy();
-});
-
+/**
+ * scan & lod ${HOME}/WEB-INF/lib/*.js
+ */
+servletContext.load();
+servletContext.watch();
 server.listen(80, "localhost");
 console.log("server start on port: 80");

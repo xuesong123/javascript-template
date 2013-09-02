@@ -330,6 +330,7 @@ WebApplication.prototype.getRequest = function(request, response){
     response.request = request;
 
     request.attributes = {};
+    request.originalURL = url.path;
     request.requestURL = url.path;
     request.requestURI = url.pathname;
     request.queryString = (url.query || "");
@@ -663,7 +664,6 @@ ServletContext.prototype.getRequestDispatcher = function(path){
  */
 ServletContext.prototype.load = function(){
     var lib = path.join(this.getRealPath("/"), "WEB-INF/lib");
-
     console.log("********************************************");
     console.log("*                                          *");
     console.log("*           ServletContext.load            *");
@@ -753,6 +753,7 @@ ServletContext.prototype.reload = function(){
  * destroy all servlet
  */
 ServletContext.prototype.destroy = function(){
+    var lib = path.join(this.getRealPath("/"), "WEB-INF/lib");
     console.log("********************************************");
     console.log("*                                          *");
     console.log("*          ServletContext.destroy          *");
@@ -906,7 +907,7 @@ function RequestDispatcher(servletChain){
  * @param response
  * @param servletChain
  */
-RequestDispatcher.prototype.forward = function(request, response, servletChain){
+RequestDispatcher.prototype.forward = function(request, response){
     request.setAttribute("servlet_request_dispatcher", "FORWARD");
     this.servletChain.doChain(request, response);
 };
@@ -1004,7 +1005,11 @@ HttpServletRequestWrapper.getRequestDispatcher = function(path){
 
     if(dispatcher != null)
     {
-        this.requestURI = path;
+        var url = URL.parse(path);
+        this.requestURL = url.path;
+        this.requestURI = url.pathname;
+        this.queryString = (url.query || "");
+        this.parameters = Parameter.parse(url.query, this.parameters);
         return dispatcher;
     }
 
@@ -1603,7 +1608,7 @@ Timer.prototype.run = function(){
 
 /**
  * a abstract class, http 'method' dispatch
- * $RCSfile: DefaultServlet.js,v $$
+ * $RCSfile: HttpServlet.js,v $$
  * $Revision: 1.1 $
  * $Date: 2012-10-18 $
  *
@@ -1699,7 +1704,7 @@ JspServlet.prototype.service = function(request, response, servletChain){
 
     if(this.pattern.test(uri) == false)
     {
-        servletChain.doChain(request, response, servletChain);
+        servletChain.doChain(request, response);
         return;
     }
 

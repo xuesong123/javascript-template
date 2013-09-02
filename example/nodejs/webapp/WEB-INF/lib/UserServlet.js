@@ -1,7 +1,7 @@
 var UserManager = require("./manager/UserManager.js");
 var servlets = {};
 
-servlets.UserServlet = {"pattern": "/user/userList.do", "servlet": function(request, response, servletChain){
+servlets.UserListServlet = {"pattern": "/user/userList.do", "servlet": function(request, response, servletChain){
     var pageNum = request.getParameter("pageNum");
     var pageSize = request.getParameter("pageSize");
 
@@ -35,6 +35,16 @@ servlets.UserServlet = {"pattern": "/user/userList.do", "servlet": function(requ
 
     /* forward to TemplateFilter.service */
     request.getRequestDispatcher("/template/userList.jsp").forward(request, response);
+}};
+
+servlets.UserServlet = {"pattern": "/user/user.do", "servlet": function(request, response, servletChain){
+    var userId = request.getParameter("userId");
+    var user = UserManager.getById(userId);
+
+    request.setAttribute("user", user);
+
+    /* forward to TemplateFilter.service */
+    request.getRequestDispatcher("/template/user.jsp").forward(request, response);
 }};
 
 if(typeof(module) != "undefined")

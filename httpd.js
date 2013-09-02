@@ -235,15 +235,15 @@ Httpd.prototype.service = function(request, response){
 
     if(this.startsWith(realPath, homePath) == false)
     {
-        response.writeHead(403, "Forbidden", {"Content-Type": "text/plain"});
+        response.writeHead(403, "Forbidden", {"Content-Type": "text/html"});
         response.end();
         return;
     }
 
     if(fs.existsSync(realPath) == false)
     {
-        response.writeHead(404, "Not Found", {"Content-Type": "text/plain"});
-        response.end();
+        response.writeHead(404, "Not Found", {"Content-Type": "text/html"});
+        response.end("<h1 error=\"httpd.404\">Request URL: " + request.url + " not found !");
         return;
     }
 
