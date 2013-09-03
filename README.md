@@ -81,10 +81,8 @@ api:
 // scope: global
 com.skin.ayada.jstl.TagLibraryFactory.setup("app:scrollpage", com.mytest.taglib.ScrollPageTag);
 
-/**
  * @param home - work directory
  * @param expire
- */
 var templateContext = new com.skin.ayada.template.TemplateContext("/", 300);
 
 var writer = var writer = new com.skin.io.StringWriter();
