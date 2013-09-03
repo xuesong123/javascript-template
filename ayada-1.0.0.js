@@ -1670,7 +1670,7 @@ var com = (function(){
      */
     TagLibraryFactory.getDefaultTagLibrary = function(){
         return {
-                // "t:import":       com.skin.ayada.jstl.core.ImportTag,
+                "t:import":          com.skin.ayada.jstl.core.ImportTag,
                 "c:if":              com.skin.ayada.jstl.core.IfTag,
                 "c:set":             com.skin.ayada.jstl.core.SetTag,
                 "c:out":             com.skin.ayada.jstl.core.OutTag,
@@ -2203,7 +2203,7 @@ var com = (function(){
 
         if(stack.peek() != null)
         {
-            throw {"name": "RuntimeException", "message": toString("Exception at ", stack.peek()) + " not match !"};
+            throw {"name": "RuntimeException", "message": this.toString("Exception at ", stack.peek()) + " not match !"};
         }
 
         var template = new com.skin.ayada.template.Template(list);
@@ -2290,6 +2290,9 @@ var com = (function(){
                 var node = new Node(nodeName);
                 node.setLineNumber(this.getLineNumber());
                 var attributes = this.getAttributes();
+                node.setOffset(list.length);
+                node.setLength(2);
+                node.setLineNumber(this.lineNumber);
                 node.setAttributes(attributes);
                 node.setClosed(NodeType.SELF_CLOSED);
                 this.pushNode(stack, list, node);
@@ -2310,6 +2313,7 @@ var com = (function(){
                 var name = attributes["name"];
                 var className = attributes["className"];
                 this.setupTagLibrary(name, className);
+                this.popNode(stack, list, nodeName);
                 return;
             }
 
@@ -3014,19 +3018,19 @@ var com = (function(){
         buffer.push(node.getLineNumber());
         buffer.push(" ");
 
-        if(node.getNodeType() == NodeType.TEXT)
+        if(node.getNodeType() == com.skin.ayada.statement.NodeType.TEXT)
         {
             buffer.push(node.toString());
             return buffer.join("");
         }
 
-        if(node.getNodeType() == NodeType.COMMENT)
+        if(node.getNodeType() == com.skin.ayada.statement.NodeType.COMMENT)
         {
             buffer.push(node.toString());
             return buffer.join("");
         }
 
-        if(node.getNodeType() == NodeType.EXPRESSION)
+        if(node.getNodeType() == com.skin.ayada.statement.NodeType.EXPRESSION)
         {
             buffer.push("${");
             buffer.push(node.toString());
@@ -3050,7 +3054,7 @@ var com = (function(){
             }
         }
 
-        if(node.getClosed() == NodeType.PAIR_CLOSED)
+        if(node.getClosed() == com.skin.ayada.statement.NodeType.PAIR_CLOSED)
         {
             buffer.push(">...");
             buffer.push("</");
@@ -3851,6 +3855,44 @@ var com = (function(){
     if(typeof(com.skin.ayada.jstl.core) == "undefined"){
         com.skin.ayada.jstl.core = {};
     }
+
+    /*
+     * $RCSfile: ImportTag.js,v $$
+     * $Revision: 1.1 $
+     * $Date: 2013-2-19 $
+     *
+     * Copyright (C) 2008 Skin, Inc. All rights reserved.
+     *
+     * This software is the proprietary information of Skin, Inc.
+     * Use is subject to license terms.
+     */
+    var ImportTag = com.skin.ayada.jstl.core.ImportTag = com.skin.framework.Class.create(com.skin.ayada.tagext.TagSupport, function(){
+        this.name = null;
+        this.className = null;
+    });
+
+    ImportTag.prototype.doStartTag = function(){
+        if(this.name != null && this.className != null)
+        {
+            var clazz = null;
+
+            try
+            {
+                clazz = (new Function("return " + this.className + ";"))();
+            }
+            catch(e)
+            {
+            }
+
+            if(clazz != null)
+            {
+                var library = {};
+                library[this.name] = clazz;
+                this.pageContext.getTagLibrary().setup(library);
+            }
+        }
+        return com.skin.ayada.tagext.Tag.SKIP_BODY;
+    };
 
     /*
      * $RCSfile: ChooseTag.js,v $$

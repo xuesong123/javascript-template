@@ -17,7 +17,7 @@ div.pagebar input{width: 30px;}
 h3{margin-top: 10px;}
 </style>
 <script type="text/javascript" src="console/js/console.js"></script>
-<script type="text/javascript" src="ayada-1.0.0.min.js"></script>
+<script type="text/javascript" src="ayada-1.0.0.js"></script>
 <script type="text/javascript" src="app.taglib.js"></script>
 <script type="text/javascript">
 //<![CDATA[
@@ -112,7 +112,7 @@ window.onload = function(){
 
     /* 添加自定义标签 */
     com.skin.ayada.jstl.TagLibraryFactory.setup("app:scrollpage", com.mytest.taglib.ScrollPageTag);
-    com.skin.ayada.jstl.TagLibraryFactory.setup("app:cache", com.mytest.taglib.CacheTag);
+    // com.skin.ayada.jstl.TagLibraryFactory.setup("app:cache", com.mytest.taglib.CacheTag);
 
     /**
      * 重写获取资源方法
@@ -162,6 +162,7 @@ window.onload = function(){
 
 <!-- Template -->
 <script name="source1" type="text/template">
+<t:import name="app:cache" className="com.mytest.taglib.CacheTag" />
 <h3>System Time: <fmt:formatDate value="${new Date()}" pattern="yyyy-MM-dd HH:mm:ss SSS"/></h3>
 
 <h3>cacheTag test</h3>
