@@ -93,6 +93,81 @@ Parameter.parse = function(query, parameters){
     return parameters;
 };
 
+var DateUtil = {};
+
+DateUtil.toString = function(date){
+    if(date == null)
+    {
+        return "";
+    }
+
+    var y = date.getFullYear();
+    var M = date.getMonth() + 1;
+    var d = date.getDate();
+    var h = date.getHours();
+    var m = date.getMinutes();
+    var s = date.getSeconds();
+    var S = date.getTime() % 1000;
+
+    var a = [];
+
+    a[a.length] = y.toString();
+    a[a.length] = "-";
+
+    if(M < 10)
+    {
+        a[a.length] = "0";
+    }
+
+    a[a.length] = M.toString();
+    a[a.length] = "-";
+
+    if(d < 10)
+    {
+        a[a.length] = "0";
+    }
+
+    a[a.length] = d.toString();
+    a[a.length] = " ";
+
+    if(h < 10)
+    {
+        a[a.length] = "0";
+    }
+
+    a[a.length] = h.toString();
+    a[a.length] = ":";
+
+    if(m < 10)
+    {
+        a[a.length] = "0";
+    }
+
+    a[a.length] = m.toString();
+    a[a.length] = ":";
+
+    if(s < 10)
+    {
+        a[a.length] = "0";
+    }
+
+    a[a.length] = s.toString();
+    a[a.length] = " ";
+
+    if(S < 100)
+    {
+        a[a.length] = "0";
+    }
+
+    if(S < 10)
+    {
+        a[a.length] = "0";
+    }
+
+    a[a.length] = S.toString();
+    return a.join("");
+};
+
 /**
  * $RCSfile: Iterator.js,v $$
  * $Revision: 1.1 $
@@ -837,6 +912,7 @@ ServletContext.prototype.load = function(){
         }
     }
 
+    this.watch();
     this.status = 2;
     console.log(this.toString());
 };
@@ -854,7 +930,6 @@ ServletContext.prototype.reload = function(){
  */
 ServletContext.prototype.destroy = function(){
     this.status = 3;
-    // process.stdout.write("\033[34m");
     var lib = path.join(this.getRealPath("/"), "WEB-INF/lib");
     console.log("********************************************");
     console.log("*                                          *");
@@ -862,6 +937,8 @@ ServletContext.prototype.destroy = function(){
     console.log("*                                          *");
     console.log("********************************************");
     console.log("[ServletContext]: " + this.index + " Destroy ServletContext: " + lib);
+
+    this.unwatch();
 
     /**
      * destroy servlet
@@ -909,7 +986,18 @@ ServletContext.prototype.destroy = function(){
     this.context = {};
     this.status = 0;
     console.log("");
-    // process.stdout.write("\033[90m");
+};
+
+ServletContext.prototype.unwatch = function(){
+    if(this.watchFileList != null)
+    {
+        for(var i = 0, length = this.watchFileList.length; i < length; i++)
+        {
+            console.log("[ServletContext]: UNWATCH: " + this.watchFileList[i]);
+            fs.unwatchFile(this.watchFileList[i]);
+        }
+        this.watchFileList = [];
+    }
 };
 
 ServletContext.prototype.watch = function(){
@@ -919,15 +1007,26 @@ ServletContext.prototype.watch = function(){
     {
         var instance = this;
 
+        if(this.watchFileList == null)
+        {
+            this.watchFileList = [];
+        }
+        else
+        {
+            this.unwatch();
+        }
+
         FileIterator.each(lib, function(file){
             var stats = fs.statSync(file);
 
             if(stats.isDirectory())
             {
                 console.log("[ServletContext]: WATCH: " + file);
+                instance.watchFileList.push(file);
 
-                fs.watch(file, function(event, fileName){
-                    /* console.log("WATCH EVENT: " + event + " - file: " + fileName); */
+                fs.watchFile(file, function(curr, prev){
+                    console.log(file + " - the current mtime is: " + DateUtil.toString(curr.mtime));
+                    console.log(file + " - the previous mtime was: " + DateUtil.toString(prev.mtime));
 
                     if(instance.watchTimer != null)
                     {

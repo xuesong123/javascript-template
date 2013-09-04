@@ -26,7 +26,6 @@ process.on("exit", function(){
  * scan & lod ${HOME}/WEB-INF/lib/*.js
  */
 servletContext.load();
-servletContext.watch();
 
 var server = (function(){
     return http.createServer(function(request, response){

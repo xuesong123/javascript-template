@@ -27,10 +27,7 @@ admin.servletContext.getServletContextList = function(){
 
 admin.servletContext.admin = true;
 admin.servletContext.load();
-admin.servletContext.watch();
-
 app1.servletContext.load();
-app1.servletContext.watch();
 
 var server = (function(){
     return http.createServer(function(request, response){
