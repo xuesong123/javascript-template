@@ -18,18 +18,6 @@ webServer.add(vistualHost);
 vistualHost.add(app1);
 vistualHost.add(admin);
 
-var server = (function(){
-    return http.createServer(function(request, response){
-        if(request.url == "/favicon.ico")
-        {
-            response.writeHead(404, "Not Found", {"Content-Type": "text/plain"});
-            response.end();
-            return;
-        }
-        webServer.dispatch(request, response);
-    });
-})();
-
 /**
  * scan & lod ${HOME}/WEB-INF/lib/*.js
  */
@@ -42,6 +30,18 @@ admin.servletContext.watch();
 
 app1.servletContext.load();
 app1.servletContext.watch();
+
+var server = (function(){
+    return http.createServer(function(request, response){
+        if(request.url == "/favicon.ico")
+        {
+            response.writeHead(404, "Not Found", {"Content-Type": "text/plain"});
+            response.end();
+            return;
+        }
+        webServer.dispatch(request, response);
+    });
+})();
 
 server.listen(80, "localhost");
 console.log("server start on port: 80");

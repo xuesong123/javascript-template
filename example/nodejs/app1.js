@@ -14,18 +14,6 @@ july.JspServlet.prototype.execute = function(request, response, servletChain){
  */
 var webApplication = july.WebApplicationFactory.create("localhost", "webapp", "/");
 var servletContext = webApplication.servletContext;
-var server = (function(){
-    return http.createServer(function(request, response){
-        if(request.url == "/favicon.ico")
-        {
-            response.writeHead(404, "Not Found", {"Content-Type": "text/plain"});
-            response.end();
-            return;
-        }
-
-        webApplication.dispatch(request, response);
-    });
-})();
 
 process.stdin.resume();
 process.stdin.setEncoding("utf8");
@@ -39,6 +27,19 @@ process.on("exit", function(){
  */
 servletContext.load();
 servletContext.watch();
+
+var server = (function(){
+    return http.createServer(function(request, response){
+        if(request.url == "/favicon.ico")
+        {
+            response.writeHead(404, "Not Found", {"Content-Type": "text/plain"});
+            response.end();
+            return;
+        }
+
+        webApplication.dispatch(request, response);
+    });
+})();
 
 server.listen(80, "localhost");
 console.log("server start on port: 80");
