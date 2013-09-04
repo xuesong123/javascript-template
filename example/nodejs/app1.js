@@ -32,5 +32,6 @@ process.on("exit", function(){
  */
 servletContext.load();
 servletContext.watch();
+
 server.listen(80, "localhost");
 console.log("server start on port: 80");

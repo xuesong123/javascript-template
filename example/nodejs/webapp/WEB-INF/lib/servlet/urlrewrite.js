@@ -27,7 +27,7 @@ UrlRewriteDispatcher.init = function(servletContext){
     }
 };
 
-UrlRewriteDispatcher.init = null;
+// UrlRewriteDispatcher.init = null;
 
 UrlRewriteDispatcher.service = function(request, response, servletChain){
     this.dispatch(request, response, servletChain);
@@ -53,6 +53,8 @@ UrlRewriteDispatcher.dispatch = function(request, response, servletChain){
                 url = url.replace("$" + i, arr[i]);
             }
 
+            console.log("urlrewrite.dispatch: " + requestURI + " - to " + url);
+
             if(rule.type != "redirect")
             {
                 request.getRequestDispatcher(url).forward(request, response);
@@ -73,10 +75,7 @@ UrlRewriteDispatcher.dispatch = function(request, response, servletChain){
  * for test
  * http://localhost/test/a1/b2/c3/d4/e5/f6/g7/h8/i.html
  */
-var servlets = {};
-servlets.urlrewrite = {"pattern": "/*", "servlet": UrlRewriteDispatcher};
-
 if(typeof(module) != "undefined")
 {
-    module.exports.servlets = servlets;
+    module.exports.urlrewrite = UrlRewriteDispatcher;
 }

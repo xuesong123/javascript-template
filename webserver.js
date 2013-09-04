@@ -583,7 +583,7 @@ ServletContext.prototype.set = function(name, pattern, service){
 
     if(servlet != null)
     {
-        this.context[name] = {"name": name, "pattern": new RegExp(pattern), "servlet": servlet};
+        this.context[name] = {"name": name, "pattern": pattern, "servlet": servlet};
     }
 };
 
@@ -605,7 +605,7 @@ ServletContext.prototype.getServletChain = function(url){
 
     for(var i in this.context)
     {
-        pattern = this.context[i].pattern;
+        pattern = new RegExp(this.context[i].pattern);
 
         if(pattern.test(url) == true)
         {
@@ -701,28 +701,38 @@ ServletContext.prototype.load = function(){
         }
     });
 
+    var servletLib = path.join(lib, "servlet");
+
     if(fs.existsSync(lib) == true)
     {
-        var list = fs.readdirSync(lib);
+        var map = {};
+        var list = fs.readdirSync(servletLib);
 
+        /**
+         * build servlet
+         */
         for(var i = 0, length = list.length; i < length; i++)
         {
             var fileName = list[i];
-            var stats = fs.statSync(path.join(lib, fileName));
+            var filePath = path.join(servletLib, fileName);
+            var stats = fs.statSync(filePath);
 
             if(stats.isFile())
             {
                 if(fileName.length >= 3 && fileName.substring(fileName.length - 3).toLowerCase() == ".js")
                 {
-                    var filePath = path.join(lib, fileName);
-                    var servlets = require(filePath).servlets;
+                    var servlets = require(filePath);
 
                     if(servlets != null)
                     {
                         for(var name in servlets)
                         {
-                            var servlet = servlets[name];
-                            this.set(name, servlet.pattern, servlet.servlet);
+                            if(map[name] != null)
+                            {
+                                throw new Error("servlet \"" + name + "\ already exists!");
+                            }
+
+                            map[name] = servlets[name];
                         }
                     }
                 }
@@ -735,16 +745,60 @@ ServletContext.prototype.load = function(){
         /**
          * init servlet
          */
-        for(var name in this.context)
+        for(var name in map)
         {
-            var servlet = this.context[name].servlet;
+            var servlet = map[name];
 
-            if(servlet.init != null)
+            if(typeof(servlet) == "object")
             {
-                servlet.init(this);
+                if(servlet.init != null)
+                {
+                    servlet.init(this);
+                }
+            }
+        }
+
+        var webjs = path.join(lib, "web.js");
+
+        /**
+         * push servlet
+         */
+        if(fs.existsSync(webjs) == true)
+        {
+            var stats = fs.statSync(webjs);
+            var servletConfig = null;
+
+            if(stats.isFile())
+            {
+                servletConfig = require(webjs).servletConfig;
+            }
+
+            if(servletConfig != null)
+            {
+                var chain = servletConfig.chain;
+
+                if(chain != null)
+                {
+                    var c = null;
+                    var s = null;
+                    for(var i = 0, length = chain.length; i < length; i++)
+                    {
+                        c = chain[i];
+                        s = map[c.servlet];
+
+                        if(s == null)
+                        {
+                            throw new Error("servlet \"" + c.servlet + "\ not exists!");
+                        }
+
+                        this.set("_servlet_" + i, c.pattern, s);
+                    }
+                }
             }
         }
     }
+
+    console.log(this.toString());
 };
 
 /**
@@ -811,6 +865,22 @@ ServletContext.prototype.watch = function(){
             }
         });
     }
+};
+
+/**
+ * destroy all servlet
+ */
+ServletContext.prototype.toString = function(){
+    var buffer = [];
+    var context = this.context;
+
+    for(var i in context)
+    {
+        var servletConfig = context[i];
+        buffer.push("CHAIN: " + servletConfig.name + " - " + servletConfig.pattern);
+    }
+
+    return buffer.join("\r\n");
 };
 
 var FileIterator = {};

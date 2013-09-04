@@ -1,7 +1,6 @@
-var UserManager = require("./manager/UserManager.js");
-var servlets = {};
+var UserManager = require("./../manager/UserManager.js");
 
-servlets.UserListServlet = {"pattern": "/user/userList.do", "servlet": function(request, response, servletChain){
+var UserListServlet = function(request, response, servletChain){
     var pageNum = request.getParameter("pageNum");
     var pageSize = request.getParameter("pageSize");
 
@@ -35,9 +34,9 @@ servlets.UserListServlet = {"pattern": "/user/userList.do", "servlet": function(
 
     /* forward to TemplateFilter.service */
     request.getRequestDispatcher("/template/userList.jsp").forward(request, response);
-}};
+};
 
-servlets.UserServlet = {"pattern": "/user/user.do", "servlet": function(request, response, servletChain){
+var UserServlet = function(request, response, servletChain){
     var userId = request.getParameter("userId");
     var user = UserManager.getById(userId);
 
@@ -45,9 +44,10 @@ servlets.UserServlet = {"pattern": "/user/user.do", "servlet": function(request,
 
     /* forward to TemplateFilter.service */
     request.getRequestDispatcher("/template/user.jsp").forward(request, response);
-}};
+};
 
 if(typeof(module) != "undefined")
 {
-    module.exports.servlets = servlets;
+    module.exports.UserServlet = UserServlet;
+    module.exports.UserListServlet = UserListServlet;
 }
