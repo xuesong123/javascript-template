@@ -6,7 +6,6 @@
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Cache-Control" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
-<link rel="stylesheet" type="text/css" href="console/css/console.css"/>
 <style type="text/css">
 body{font-size: 14px;}
 div.pagebar{clear: both;}

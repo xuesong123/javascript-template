@@ -23,11 +23,9 @@ UrlRewriteDispatcher.init = function(servletContext){
 
     for(var i = 0, length = rules.length; i < length; i++)
     {
-        console.log("set rule: " + rules[i].from);
+        console.log("[URLREWRITE]: set rule - " + rules[i].from);
     }
 };
-
-// UrlRewriteDispatcher.init = null;
 
 UrlRewriteDispatcher.service = function(request, response, servletChain){
     this.dispatch(request, response, servletChain);
@@ -45,7 +43,6 @@ UrlRewriteDispatcher.dispatch = function(request, response, servletChain){
 
         if(arr != null)
         {
-            var args = [];
             var url = rule.to;
 
             for(var i = 1; i < arr.length; i++)
@@ -53,7 +50,7 @@ UrlRewriteDispatcher.dispatch = function(request, response, servletChain){
                 url = url.replace("$" + i, arr[i]);
             }
 
-            console.log("urlrewrite.dispatch: " + requestURI + " - to " + url);
+            console.log("[URLREWRITE]: from" + requestURI + " to " + url);
 
             if(rule.type != "redirect")
             {

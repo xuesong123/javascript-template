@@ -220,9 +220,16 @@ VistualHost.prototype.add = function(webApplication){
  */
 VistualHost.prototype.getWebApplication = function(request){
     var uri = request.requestURI;
+    var root = null;
 
     for(var i = 0, length = this.applications.length; i < length; i++)
     {
+        if(this.applications[i].path == null || this.applications[i].path == "/")
+        {
+            root = this.applications[i];
+            continue;
+        }
+
         var prefix = this.applications[i].path + "/";
 
         if(uri.length >= prefix.length && uri.substring(0, prefix.length) == prefix)
@@ -231,7 +238,7 @@ VistualHost.prototype.getWebApplication = function(request){
         }
     }
 
-    return null;
+    return (root != null ? root : null);
 };
 
 /**
@@ -504,7 +511,7 @@ WebApplication.prototype.execute = function(request, response, servletChain){
     else
     {
         response.writeHead(404, "Not Found", {"ContentType": "text/plain"});
-        response.end("<h1 error=\"10003\">Request URL: " + request.url + " not found !");
+        response.end("<h1 error=\"10002\">Request URL: " + request.url + " not found !");
         return 404;
     }
 };
@@ -541,6 +548,8 @@ function ServletContext(host, home, path){
     this.host = host;
     this.home = home;
     this.path = path;
+    this.status = 0;
+    this.index = 0;
     this.context = {};
 };
 
@@ -701,12 +710,13 @@ ServletContext.prototype.getRequestDispatcher = function(path){
  * TODO: reload
  */
 ServletContext.prototype.load = function(){
-    if(this.index == null)
+    if(this.status != 0)
     {
-        this.index = 0;
+        this.destroy();
     }
 
     this.index++;
+    this.status = 1;
 
     var lib = path.join(this.getRealPath("/"), "WEB-INF/lib");
     console.log("********************************************");
@@ -715,36 +725,6 @@ ServletContext.prototype.load = function(){
     console.log("*                                          *");
     console.log("********************************************");
     console.log("[ServletContext]: " + this.index + " Load ServletContext: " + lib);
-
-    var cache = require.cache;
-
-    for(var i in cache)
-    {
-        if(StringUtil.startsWith(i, this.getRealPath("/")))
-        {
-            if(require.cache[i] != null)
-            {
-                delete require.cache[i];
-                console.log("[ServletContext]: DELETE MODUL: " + i);
-            }
-        }
-    }
-
-    /**
-     * delete require cache
-     */
-    FileIterator.each(lib, function(file){
-        var stats = fs.statSync(file);
-
-        if(stats.isFile())
-        {
-            if(require.cache[file] != null)
-            {
-                delete require.cache[file];
-                console.log("[ServletContext]: DELETE MODUL: " + file);
-            }
-        }
-    });
 
     var servletLib = path.join(lib, "servlet");
 
@@ -843,6 +823,7 @@ ServletContext.prototype.load = function(){
         }
     }
 
+    this.status = 2;
     console.log(this.toString());
 };
 
@@ -858,7 +839,8 @@ ServletContext.prototype.reload = function(){
  * destroy all servlet
  */
 ServletContext.prototype.destroy = function(){
-    process.stdout.write("\033[34m");
+    this.status = 3;
+    // process.stdout.write("\033[34m");
     var lib = path.join(this.getRealPath("/"), "WEB-INF/lib");
     console.log("********************************************");
     console.log("*                                          *");
@@ -880,9 +862,40 @@ ServletContext.prototype.destroy = function(){
         }
     }
 
+    var cache = require.cache;
+
+    for(var i in cache)
+    {
+        if(StringUtil.startsWith(i, this.getRealPath("/")))
+        {
+            if(require.cache[i] != null)
+            {
+                delete require.cache[i];
+                console.log("[ServletContext]: DELETE MODUL: " + i);
+            }
+        }
+    }
+
+    /**
+     * delete require cache
+     */
+    FileIterator.each(lib, function(file){
+        var stats = fs.statSync(file);
+
+        if(stats.isFile())
+        {
+            if(require.cache[file] != null)
+            {
+                delete require.cache[file];
+                console.log("[ServletContext]: DELETE MODUL: " + file);
+            }
+        }
+    });
+
     this.context = {};
+    this.status = 0;
     console.log("");
-    process.stdout.write("\033[90m");
+    // process.stdout.write("\033[90m");
 };
 
 ServletContext.prototype.watch = function(){
@@ -1789,7 +1802,7 @@ HttpServlet.prototype.service = function(request, response, servletChain){
     else
     {
         response.writeHead(404, "Not Found", {"Content-Type": "text/plain"});
-        response.end("UNKNOWN METHOD: " + method);
+        response.end("<h1 error=\"10003\">UNKNOWN METHOD: " + method + "</h1>");
     }
 };
 
