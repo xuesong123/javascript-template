@@ -9,15 +9,14 @@ july.JspServlet.prototype.execute = function(request, response, servletChain){
     response.end("<h1 error=\"10004\">Request URL '" + request.requestURI + "' not found !</h1>");
 };
 
+var webServer = new july.WebServer();
+var vistualHost = new july.VistualHost("localhost|127\\.0\\.0\\.1");
 var app1 = july.WebApplicationFactory.create("localhost", "webapp", "/");
 var admin = july.WebApplicationFactory.create("localhost", "admin", "/admin");
 
-var host1 = new july.VistualHost("localhost");
-host1.add(app1);
-host1.add(admin);
-
-var webServer = new july.WebServer();
-webServer.add(host1);
+webServer.add(vistualHost);
+vistualHost.add(app1);
+vistualHost.add(admin);
 
 var server = (function(){
     return http.createServer(function(request, response){

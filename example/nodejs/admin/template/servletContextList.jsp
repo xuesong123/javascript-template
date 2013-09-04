@@ -18,6 +18,9 @@ h3{margin-top: 10px;}
 </head>
 <body>
 <t:include file="/include/common/header.jsp"/>
+<h1>Application Admin Console</h1>
+<hr/>
+<p></p>
 <table border="1" style="width: 800px;">
     <c:forEach items="${servletContextList}" var="servletContext" varStatus="status">
         <tr>

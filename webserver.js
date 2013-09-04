@@ -177,20 +177,36 @@ WebServer.prototype.getWebApplication = function(request){
  * @param response
  */
 WebServer.prototype.dispatch = function(request, response){
-    var url = URL.parse(request.url);
-    request.requestURL = url.path;
-    request.requestURI = url.pathname;
+    var exception = null;
 
-    var webApplication = this.getWebApplication(request);
-
-    if(webApplication != null)
+    try
     {
-        webApplication.dispatch(request, response);
+        var url = URL.parse(request.url);
+        request.requestURL = url.path;
+        request.requestURI = url.pathname;
+
+        var webApplication = this.getWebApplication(request);
+
+        if(webApplication != null)
+        {
+            webApplication.dispatch(request, response);
+        }
+        else
+        {
+            response.statusCode = 404;
+            response.end("<h1 error=\"10001\">Request URL: " + request.requestURL + " not found !");
+        }
     }
-    else
+    catch(e)
     {
-        response.statusCode = 404;
-        response.end("<h1 error=\"10001\">Request URL: " + request.requestURL + " not found !");
+        exception = e;
+    }
+
+    if(exception != null)
+    {
+        response.writeHead(500, "Internal Server Error", {"Content-type": "text/html"});
+        response.end("<h4>" + exception.name + ": " + exception.message + "</h4>");
+        return;
     }
 };
 
@@ -463,8 +479,6 @@ WebApplication.prototype.dispatch = function(req, res){
         response.end("<h4>" + exception.name + ": " + exception.message + "</h4>");
         return;
     }
-
-    // response.end();
 };
 
 /**
