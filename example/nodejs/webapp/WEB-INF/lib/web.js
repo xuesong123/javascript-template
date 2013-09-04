@@ -5,6 +5,7 @@ servletConfig.set = function(pattern, servlet){
 };
 
 servletConfig.set("/*",                         "urlrewrite");
+servletConfig.set("/*",                         "DispatcherServlet");
 servletConfig.set("/template/*",                "TemplateFilter");
 servletConfig.set("/user/userList.do",          "UserListServlet");
 servletConfig.set("/user/user.do",              "UserServlet");

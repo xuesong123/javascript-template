@@ -360,6 +360,17 @@ WebApplication.prototype.getResponse = function(request, response){
         response[i] = HttpServletResponseWrapper[i];
     }
 
+    response._end = response.end;
+
+    response.end = function(){
+        if(this._end != null)
+        {
+            this._end.apply(this, arguments);
+        }
+
+        this._end = function(){};
+    };
+
     return response;
 };
 
@@ -376,8 +387,10 @@ WebApplication.prototype.dispatch = function(req, res){
      */
     try
     {
+        res.statusCode = 200;
         res.setHeader("Server", "Httpd/1.1");
         res.setHeader("Accept-Ranges", "bytes");
+        res.setHeader("Content-type", "text/html");
 
         var request = this.getRequest(req, res);
         var response = this.getResponse(req, res);
@@ -455,10 +468,35 @@ WebApplication.prototype.dispatch = function(req, res){
 WebApplication.prototype.execute = function(request, response, servletChain){
     if(servletChain.size() > 0)
     {
-        if(servletChain.hasNext())
+        while(servletChain.hasNext())
         {
+            var flag = false;
             var element = servletChain.next();
-            element.servlet.service(request, response, servletChain);
+            var servlet = element.servlet;
+
+            if(servlet.dispatcher == null)
+            {
+                flag = true;
+            }
+            else
+            {
+                var type = request.getAttribute("servlet_request_dispatcher");
+
+                for(var i = 0; i < servlet.dispatcher.length; i++)
+                {
+                    if(type == servlet.dispatcher[i])
+                    {
+                        flag = true;
+                        break;
+                    }
+                }
+            }
+
+            if(flag)
+            {
+                servlet.service(request, response, servletChain);
+                break;
+            }
         }
 
         return 200;
@@ -663,13 +701,20 @@ ServletContext.prototype.getRequestDispatcher = function(path){
  * TODO: reload
  */
 ServletContext.prototype.load = function(){
+    if(this.index == null)
+    {
+        this.index = 0;
+    }
+
+    this.index++;
+
     var lib = path.join(this.getRealPath("/"), "WEB-INF/lib");
     console.log("********************************************");
     console.log("*                                          *");
     console.log("*           ServletContext.load            *");
     console.log("*                                          *");
     console.log("********************************************");
-    console.log("Load ServletContext: " + this.home + " - " + lib);
+    console.log("[ServletContext]: " + this.index + " Load ServletContext: " + lib);
 
     var cache = require.cache;
 
@@ -680,7 +725,7 @@ ServletContext.prototype.load = function(){
             if(require.cache[i] != null)
             {
                 delete require.cache[i];
-                console.log("DELETE MODUL: " + i);
+                console.log("[ServletContext]: DELETE MODUL: " + i);
             }
         }
     }
@@ -696,7 +741,7 @@ ServletContext.prototype.load = function(){
             if(require.cache[file] != null)
             {
                 delete require.cache[file];
-                console.log("DELETE MODUL: " + file);
+                console.log("[ServletContext]: DELETE MODUL: " + file);
             }
         }
     });
@@ -805,7 +850,6 @@ ServletContext.prototype.load = function(){
  * reload all servlet
  */
 ServletContext.prototype.reload = function(){
-    this.context = {};
     this.destroy();
     this.load();
 };
@@ -814,13 +858,14 @@ ServletContext.prototype.reload = function(){
  * destroy all servlet
  */
 ServletContext.prototype.destroy = function(){
+    process.stdout.write("\033[34m");
     var lib = path.join(this.getRealPath("/"), "WEB-INF/lib");
     console.log("********************************************");
     console.log("*                                          *");
     console.log("*          ServletContext.destroy          *");
     console.log("*                                          *");
     console.log("********************************************");
-    console.log("Destroy ServletContext: " + this.home + " - " + lib);
+    console.log("[ServletContext]: " + this.index + " Destroy ServletContext: " + lib);
 
     /**
      * destroy servlet
@@ -835,7 +880,9 @@ ServletContext.prototype.destroy = function(){
         }
     }
 
+    this.context = {};
     console.log("");
+    process.stdout.write("\033[90m");
 };
 
 ServletContext.prototype.watch = function(){
@@ -850,7 +897,7 @@ ServletContext.prototype.watch = function(){
 
             if(stats.isDirectory())
             {
-                console.log("WATCH: " + file);
+                console.log("[ServletContext]: WATCH: " + file);
 
                 fs.watch(file, function(event, fileName){
                     /* console.log("WATCH EVENT: " + event + " - file: " + fileName); */
@@ -867,6 +914,14 @@ ServletContext.prototype.watch = function(){
     }
 };
 
+ServletContext.prototype.restart = function(){
+    this.reload();
+};
+
+ServletContext.prototype.shutdown = function(){
+    this.destroy();
+};
+
 /**
  * destroy all servlet
  */
@@ -877,7 +932,7 @@ ServletContext.prototype.toString = function(){
     for(var i in context)
     {
         var servletConfig = context[i];
-        buffer.push("CHAIN: " + servletConfig.name + " - " + servletConfig.pattern);
+        buffer.push("[ServletContext]: " + servletConfig.name + " - " + servletConfig.pattern);
     }
 
     return buffer.join("\r\n");
@@ -1092,7 +1147,7 @@ HttpServletRequestWrapper.getRequestDispatcher = function(path){
         return dispatcher;
     }
 
-    throw {"name": "BadRequestException", "message": "Request URL '" + path + "' not found !"};;
+    throw new Error("BadRequestException: Request URL '" + path + "' not found !");
 };
 
 /**
@@ -1489,7 +1544,7 @@ function SessionContext(timeout){
 SessionContext.prototype.create = function(response){
     if(this.count >= 1000000)
     {
-        // throw {"name": "TooManySessionException", "message": "Too many session to be created !"};
+        throw new Error("TooManySessionException: Too many session to be created !");
     }
 
     var sessionId = [new Date().getTime(), this.index].join("");
