@@ -22,19 +22,19 @@ h3{margin-top: 10px;}
 <hr/>
 <p></p>
 <table border="1" style="width: 800px;">
+    <tr>
+        <td>Host</td>
+        <td>Home</td>
+        <td>Path</td>
+        <td>Status</td>
+        <td>Operate</td>
+    </tr>
     <c:forEach items="${servletContextList}" var="servletContext" varStatus="status">
-        <tr>
-            <td>Host</td>
-            <td>Home</td>
-            <td>Path</td>
-            <td>Status</td>
-            <td>Operate</td>
-        </tr>
         <tr>
             <td>${servletContext.host}</td>
             <td>${servletContext.home}</td>
             <td>${servletContext.path}</td>
-            <td>${servletContext.status}
+            <td title="status: ${servletContext.status}">
                 <c:choose>
                     <c:when test="${servletContext.status == 0}"><span style="color: #ff0000;">stoped</span></c:when>
                     <c:when test="${servletContext.status == 1}"><span style="color: #ffff00;">starting</span></c:when>
@@ -44,8 +44,10 @@ h3{margin-top: 10px;}
                 </c:choose>
             </td>
             <td>
-                <a href="/admin/restart.do?contextPath=${servletContext.path}">restart</a>
-                <a href="/admin/shutdown.do?contextPath=${servletContext.path}">shutdown</a>
+                <c:if test="${servletContext.admin != true}">
+                    <a href="/admin/restart.do?contextPath=${servletContext.path}">restart</a>
+                    <a href="/admin/shutdown.do?contextPath=${servletContext.path}">shutdown</a>
+                </c:if>
             </td>
         </tr>
     </c:forEach>

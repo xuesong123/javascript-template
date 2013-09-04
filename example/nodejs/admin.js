@@ -22,9 +22,10 @@ vistualHost.add(admin);
  * scan & lod ${HOME}/WEB-INF/lib/*.js
  */
 admin.servletContext.getServletContextList = function(){
-    return [app1.servletContext];
+    return [admin.servletContext, app1.servletContext];
 };
 
+admin.servletContext.admin = true;
 admin.servletContext.load();
 admin.servletContext.watch();
 

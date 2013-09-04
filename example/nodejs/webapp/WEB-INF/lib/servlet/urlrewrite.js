@@ -50,7 +50,7 @@ UrlRewriteDispatcher.dispatch = function(request, response, servletChain){
                 url = url.replace("$" + i, arr[i]);
             }
 
-            console.log("[URLREWRITE]: from" + requestURI + " to " + url);
+            console.log("[URLREWRITE]: from " + requestURI + " to " + url);
 
             if(rule.type != "redirect")
             {
