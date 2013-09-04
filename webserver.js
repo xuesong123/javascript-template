@@ -1019,9 +1019,9 @@ ServletContext.prototype.watch = function(){
                 console.log("[ServletContext]: WATCH: " + file);
                 instance.watchFileList.push(file);
 
-                fs.watchFile(file, function(event, fileName){
-                    // console.log(file + " - the current mtime is: " + DateUtil.toString(curr.mtime));
-                    // console.log(file + " - the previous mtime was: " + DateUtil.toString(prev.mtime));
+                fs.watchFile(file, function(curr, prev){
+                    console.log(file + " - the current mtime is: " + DateUtil.toString(curr.mtime));
+                    console.log(file + " - the previous mtime was: " + DateUtil.toString(prev.mtime));
 
                     if(instance.watchTimer != null)
                     {
