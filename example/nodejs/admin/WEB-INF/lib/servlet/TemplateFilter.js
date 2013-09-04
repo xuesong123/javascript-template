@@ -102,7 +102,7 @@ TemplateFilter.templateContext = null;
 
 TemplateFilter.init = function(servletContext){
     console.log("[TemplateFilter]: work - " + servletContext.getRealPath(this.home));
-    this.templateContext = new ayada.TemplateContext(servletContext.getRealPath(this.home), 30);
+    this.templateContext = new ayada.TemplateContext(servletContext.getRealPath(this.home), 0);
 };
 
 /**

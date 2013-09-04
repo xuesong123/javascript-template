@@ -639,6 +639,7 @@ function ServletContext(host, home, path){
     this.path = path;
     this.status = 0;
     this.index = 0;
+    this.watchStatus = 0;
     this.context = {};
 };
 
@@ -918,14 +919,6 @@ ServletContext.prototype.load = function(){
 };
 
 /**
- * reload all servlet
- */
-ServletContext.prototype.reload = function(){
-    this.destroy();
-    this.load();
-};
-
-/**
  * destroy all servlet
  */
 ServletContext.prototype.destroy = function(){
@@ -998,6 +991,8 @@ ServletContext.prototype.unwatch = function(){
         }
         this.watchFileList = [];
     }
+
+    this.watchStatus = 0;
 };
 
 ServletContext.prototype.watch = function(){
@@ -1024,9 +1019,9 @@ ServletContext.prototype.watch = function(){
                 console.log("[ServletContext]: WATCH: " + file);
                 instance.watchFileList.push(file);
 
-                fs.watchFile(file, function(curr, prev){
-                    console.log(file + " - the current mtime is: " + DateUtil.toString(curr.mtime));
-                    console.log(file + " - the previous mtime was: " + DateUtil.toString(prev.mtime));
+                fs.watchFile(file, function(event, fileName){
+                    // console.log(file + " - the current mtime is: " + DateUtil.toString(curr.mtime));
+                    // console.log(file + " - the previous mtime was: " + DateUtil.toString(prev.mtime));
 
                     if(instance.watchTimer != null)
                     {
@@ -1038,6 +1033,16 @@ ServletContext.prototype.watch = function(){
             }
         });
     }
+
+    this.watchStatus = 1;
+};
+
+/**
+ * reload all servlet
+ */
+ServletContext.prototype.reload = function(){
+    this.destroy();
+    this.load();
 };
 
 ServletContext.prototype.restart = function(){

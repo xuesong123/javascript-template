@@ -21,19 +21,28 @@ h3{margin-top: 10px;}
 <h1>Application Admin Console</h1>
 <hr/>
 <p></p>
-<table border="1" style="width: 800px;">
+<table border="1">
     <tr>
         <td>Host</td>
         <td>Home</td>
-        <td>Path</td>
+        <td>ContextPath</td>
+        <td>WatchStatus</td>
         <td>Status</td>
-        <td>Operate</td>
     </tr>
     <c:forEach items="${servletContextList}" var="servletContext" varStatus="status">
         <tr>
             <td>${servletContext.host}</td>
-            <td>${servletContext.home}</td>
+            <td>${servletContext.getRealPath("/")}</td>
             <td>${servletContext.path}</td>
+            <td title="watchStatus: ${servletContext.watchStatus}">
+                <c:choose>
+                    <c:when test="${servletContext.watchStatus == 0}"><span style="color: #ff0000;">stoped</span></c:when>
+                    <c:when test="${servletContext.watchStatus == 1}"><span style="color: #00ff00;">running</span></c:when>
+                    <c:otherwise><span style="color: #000000;">unknown</span></c:otherwise>
+                </c:choose>
+                <a href="/admin/watch.do?contextPath=${servletContext.path}">watch</a>
+                <a href="/admin/unwatch.do?contextPath=${servletContext.path}">unwatch</a>
+            </td>
             <td title="status: ${servletContext.status}">
                 <c:choose>
                     <c:when test="${servletContext.status == 0}"><span style="color: #ff0000;">stoped</span></c:when>
@@ -42,8 +51,7 @@ h3{margin-top: 10px;}
                     <c:when test="${servletContext.status == 3}"><span style="color: #00ff00;">stopping</span></c:when>
                     <c:otherwise><span style="color: #000000;">unknown</span></c:otherwise>
                 </c:choose>
-            </td>
-            <td>
+
                 <c:if test="${servletContext.admin != true}">
                     <a href="/admin/restart.do?contextPath=${servletContext.path}">restart</a>
                     <a href="/admin/shutdown.do?contextPath=${servletContext.path}">shutdown</a>
