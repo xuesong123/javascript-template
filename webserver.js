@@ -981,60 +981,28 @@ ServletContext.prototype.destroy = function(){
     console.log("");
 };
 
-ServletContext.prototype.unwatch = function(){
-    if(this.watchFileList != null)
-    {
-        for(var i = 0, length = this.watchFileList.length; i < length; i++)
-        {
-            console.log("[ServletContext]: UNWATCH: " + this.watchFileList[i]);
-            fs.unwatchFile(this.watchFileList[i]);
-        }
-        this.watchFileList = [];
-    }
-
-    this.watchStatus = 0;
-};
-
 ServletContext.prototype.watch = function(){
     var lib = path.join(this.getRealPath("/"), "WEB-INF/lib");
 
-    if(fs.existsSync(lib) == true)
+    if(this.fileWatchDog == null)
     {
         var instance = this;
-
-        if(this.watchFileList == null)
-        {
-            this.watchFileList = [];
-        }
-        else
-        {
-            this.unwatch();
-        }
-
-        FileIterator.each(lib, function(file){
-            var stats = fs.statSync(file);
-
-            if(stats.isDirectory())
-            {
-                console.log("[ServletContext]: WATCH: " + file);
-                instance.watchFileList.push(file);
-
-                fs.watchFile(file, function(curr, prev){
-                    console.log(file + " - the current mtime is: " + DateUtil.toString(curr.mtime));
-                    console.log(file + " - the previous mtime was: " + DateUtil.toString(prev.mtime));
-
-                    if(instance.watchTimer != null)
-                    {
-                        clearTimeout(instance.watchTimer);
-                    }
-
-                    instance.watchTimer = setTimeout(function(){instance.reload();}, 10000);
-                });
-            }
+        this.fileWatchDog = new FileWatchDog(lib, function(f1, f2){
+            console.log("f1: " + f1 + ", f2: " + f2);
+            instance.reload();
         });
     }
 
+    this.fileWatchDog.watch();
     this.watchStatus = 1;
+};
+
+ServletContext.prototype.unwatch = function(){
+    if(this.watchStatus != 0)
+    {
+        this.fileWatchDog.unwatch();
+        this.watchStatus = 0;
+    }
 };
 
 /**
@@ -1077,13 +1045,18 @@ FileIterator.each = function(dir, handler){
         return;
     }
 
-    handler(dir);
+    var flag = handler(dir);
+
+    if(flag == false)
+    {
+        return flag;
+    }
 
     var stats = fs.statSync(dir);
 
     if(stats.isFile())
     {
-        return;
+        return handler(dir);
     }
 
     var list = [];
@@ -1101,13 +1074,95 @@ FileIterator.each = function(dir, handler){
             if(stats.isDirectory())
             {
                 dirs.push(filePath);
-                handler(filePath);
             }
-            else if(stats.isFile())
+
+            flag = handler(filePath);
+
+            if(flag == false)
             {
-                handler(filePath);
+                return false;
             }
         }
+    }
+};
+
+var FileWatchDog = function(home, listener){
+    this.home = home;
+    this.list = [];
+    this.timer = null;
+    this.interval = 60 * 1000;
+    this.listener = listener;
+};
+
+FileWatchDog.prototype.watch = function(){
+    if(this.timer != null)
+    {
+        clearTimeout(this.timer);
+    }
+
+    var list = this.list;
+
+    if(this.list.length < 1)
+    {
+        FileIterator.each(this.home, function(file){
+            var stats = fs.statSync(file);
+
+            if(stats.isFile())
+            {
+                list.push({"file": file, "lastModified": stats.mtime.getTime()});
+            }
+        });
+    }
+    else
+    {
+        var f1 = null;
+        var f2 = null;
+        var temp = [];
+
+        console.log("[WATCH-DOG]: watch - " + this.home);
+
+        FileIterator.each(this.home, function(file){
+            var stats = fs.statSync(file);
+
+            if(stats.isFile())
+            {
+                temp.push({"file": file, "lastModified": stats.mtime.getTime()});
+            }
+        });
+
+        for(var i = 0, length = Math.min(list.length, temp.length); i < length; i++)
+        {
+            if(list[i].file != temp[i].file)
+            {
+                f1 = list[i].file;
+                f2 = temp[i].file;
+                break;
+            }
+
+            if(list[i].lastModified != temp[i].lastModified)
+            {
+                f1 = list[i].file;
+                f2 = temp[i].file;
+                break;
+            }
+        }
+
+        if(f1 != null)
+        {
+            this.list = temp;
+            this.listener(f1, f2);
+        }
+    }
+
+    var instance = this;
+    this.timer = setTimeout(function(){instance.watch()}, this.interval);
+};
+
+FileWatchDog.prototype.unwatch = function(){
+    if(this.timer != null)
+    {
+        clearTimeout(this.timer);
+        this.list.length = 0;
     }
 };
 
