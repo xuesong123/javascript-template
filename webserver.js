@@ -299,6 +299,13 @@ WebServer.prototype.start = function(){
     }
 };
 
+WebServer.prototype.shutdown = function(){
+    for(var i = 0, length = this.hosts.length; i < length; i++)
+    {
+        this.hosts[i].shutdown();
+    }
+};
+
 /**
  * $RCSfile: VistualHost.js,v $$
  * $Revision: 1.1 $
@@ -350,6 +357,13 @@ VistualHost.prototype.start = function(){
     for(var i = 0, length = this.applications.length; i < length; i++)
     {
         this.applications[i].start();
+    }
+};
+
+VistualHost.prototype.shutdown = function(){
+    for(var i = 0, length = this.applications.length; i < length; i++)
+    {
+        this.applications[i].shutdown();
     }
 };
 
@@ -423,7 +437,14 @@ function WebApplication(host, home, path){
 WebApplication.prototype.start = function(){
     if(this.servletContext != null)
     {
-        this.servletContext.load();
+        this.servletContext.start();
+    }
+};
+
+WebApplication.prototype.shutdown = function(){
+    if(this.servletContext != null)
+    {
+        this.servletContext.shutdown();
     }
 };
 
@@ -1097,6 +1118,10 @@ ServletContext.prototype.unwatch = function(){
  */
 ServletContext.prototype.reload = function(){
     this.destroy();
+    this.load();
+};
+
+ServletContext.prototype.start = function(){
     this.load();
 };
 
@@ -2175,6 +2200,50 @@ JspServlet.prototype.write = function(host, requestURI, content){
     fs.writeFileSync("work/" + host + requestURI, content, "UTF-8");
 };
 
+/**
+ * disable *.jsp
+ */
+JspServlet.prototype.service = function(request, response, servletChain){
+    servletChain.doChain(request, response);
+};
+
+var Bootstrap = {};
+
+Bootstrap.create = function(host, home){
+    var webServer = new WebServer();
+    var vistualHost = new VistualHost(host);
+    var root = fs.realpathSync(home);
+
+    if(fs.existsSync(root) == false)
+    {
+        return webServer;
+    }
+
+    var stats = fs.statSync(root);
+
+    if(stats.isFile())
+    {
+        return webServer;
+    }
+
+    var list = fs.readdirSync(root);
+
+    for(var i = 0, length = list.length; i < length; i++)
+    {
+        var dir = list[i];
+        var stats = fs.statSync(path.join(root, dir));
+
+        if(stats.isDirectory())
+        {
+            var app = WebApplicationFactory.create(host, path.join(root, dir), "/" + dir);
+            vistualHost.add(app);
+        }
+    }
+
+    webServer.add(vistualHost);
+    return webServer;
+};
+
 if(typeof(module) != "undefined")
 {
     module.exports.WebServer = WebServer;
@@ -2184,6 +2253,7 @@ if(typeof(module) != "undefined")
     module.exports.SessionContextFactory = SessionContextFactory;
     module.exports.JspServlet = JspServlet;
     module.exports.Cookie = Cookie;
+    module.exports.Bootstrap = Bootstrap;
 }
 
 /**

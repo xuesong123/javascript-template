@@ -1,1 +1,1 @@
-<div style="height: 30px; line-height: 30px;"><h3>Header</h3></div>
+<div style="height: 60px; line-height: 30px;"><h1>Application Management Console</h1></div>
