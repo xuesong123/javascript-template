@@ -7,8 +7,22 @@ AppAdminAction.prototype.forward = function(path){
     this.request.getRequestDispatcher(path).forward(this.request, this.response);
 };
 
+AppAdminAction.prototype.getServletContextList = function(){
+    var webApplication = this.request.getServletContext().getWebApplication();
+    var webApplicationContext = webApplication.getWebApplicationContext();
+    var list = webApplicationContext.getWebApplications();
+    var servletContextList = [];
+
+    for(var i = 0; i < list.length; i++)
+    {
+        servletContextList.push(list[i].getServletContext());
+    }
+
+    return servletContextList;
+};
+
 AppAdminAction.prototype.getServletContext = function(contextPath){
-    var servletContextList = this.request.getServletContext().getServletContextList();
+    var servletContextList = this.getServletContextList();
 
     for(var i = 0; i < servletContextList.length; i++)
     {
@@ -27,7 +41,7 @@ var mapping = {};
 
 mapping["list"] = {"pattern": "/admin/list.do"};
 AppAdminAction.prototype.list = function(){
-    var servletContextList = this.request.getServletContext().getServletContextList();
+    var servletContextList = this.getServletContextList();
     this.request.setAttribute("servletContextList", servletContextList);
     this.forward("/template/servletContextList.jsp");
 };
@@ -52,7 +66,22 @@ AppAdminAction.prototype.shutdown = function(){
 
     if(servletContext != null)
     {
-        servletContext.shutdown();
+        if(servletContext != this.request.getServletContext())
+        {
+            servletContext.shutdown();
+        }
+        else
+        {
+            this.response.setHeader("Content-type", "text/html");
+            this.response.write("<script type=\"text/javascript\">\r\n");
+            this.response.write("<!--\r\n");
+            this.response.write("alert(\"amdin app can't close!\");\r\n");
+            this.response.write("window.location.href = \"/admin/list.do\";\r\n");
+            this.response.write("//-->\r\n");
+            this.response.write("</script>\r\n");
+            this.response.end();
+            return;
+        }
     }
 
     this.response.redirect("/admin/list.do");

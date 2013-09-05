@@ -11,23 +11,33 @@ july.JspServlet.prototype.execute = function(request, response, servletChain){
 
 var webServer = new july.WebServer();
 var vistualHost = new july.VistualHost("localhost|127\\.0\\.0\\.1");
-var app1 = july.WebApplicationFactory.create("localhost", "webapp", "/");
+var app1 = july.WebApplicationFactory.create("localhost", "app1", "/app1");
+var app2 = july.WebApplicationFactory.create("localhost", "app2", "/app2");
 var admin = july.WebApplicationFactory.create("localhost", "admin", "/admin");
 
 webServer.add(vistualHost);
 vistualHost.add(app1);
+vistualHost.add(app2);
 vistualHost.add(admin);
+
+var servletContextList = [];
+
+for(var i = 0; i < vistualHost.applications.length; i++)
+{
+    servletContextList.push(vistualHost.applications[i].getServletContext());
+}
 
 /**
  * scan & lod ${HOME}/WEB-INF/lib/*.js
  */
 admin.servletContext.getServletContextList = function(){
-    return [admin.servletContext, app1.servletContext];
+    return servletContextList;
 };
 
 admin.servletContext.admin = true;
 admin.servletContext.load();
 app1.servletContext.load();
+app2.servletContext.load();
 
 var server = (function(){
     return http.createServer(function(request, response){

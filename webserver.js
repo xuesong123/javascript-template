@@ -279,9 +279,23 @@ WebServer.prototype.dispatch = function(request, response){
 
     if(exception != null)
     {
-        response.writeHead(500, "Internal Server Error", {"Content-type": "text/html"});
-        response.end("<h4>" + exception.name + ": " + exception.message + "</h4>");
-        return;
+        try
+        {
+            response.writeHead(500, "Internal Server Error", {"Content-type": "text/html"});
+            response.end("<h4>" + exception.name + ": " + exception.message + "</h4>");
+            return;
+        }
+        catch(e)
+        {
+            console.log("Exception: " + e);
+        }
+    }
+};
+
+WebServer.prototype.start = function(){
+    for(var i = 0, length = this.hosts.length; i < length; i++)
+    {
+        this.hosts[i].start();
     }
 };
 
@@ -332,6 +346,39 @@ VistualHost.prototype.getWebApplication = function(request){
     return (root != null ? root : null);
 };
 
+VistualHost.prototype.start = function(){
+    for(var i = 0, length = this.applications.length; i < length; i++)
+    {
+        this.applications[i].start();
+    }
+};
+
+/**
+ * $RCSfile: WebApplicationContext.js,v $$
+ * $Revision: 1.1 $
+ * $Date: 2012-10-18 $
+ *
+ * Copyright (C) 2008 Skin, Inc. All rights reserved.
+ * This software is the proprietary information of Skin, Inc.
+ * Use is subject to license terms.
+ */
+var WebApplicationContext = {id: 1, context: {}};
+
+WebApplicationContext.add = function(webApplication){
+    this.context["_webapp_" + this.id++] = webApplication;
+};
+
+WebApplicationContext.getWebApplications = function(webApplication){
+    var list = [];
+
+    for(var i in this.context)
+    {
+        list.push(this.context[i]);
+    }
+
+    return list;
+};
+
 /**
  * $RCSfile: WebApplication.js,v $$
  * $Revision: 1.1 $
@@ -354,6 +401,7 @@ WebApplicationFactory.create = function(host, home, path){
     servletContext.webApplication = webApplication;
     servletContext.defaultServlet = httpd.create(host, home, path);
     servletContext.jspServlet = new JspServlet();
+    WebApplicationContext.add(webApplication);
     return webApplication;
 };
 
@@ -370,6 +418,13 @@ function WebApplication(host, home, path){
     this.host = host;
     this.home = home;
     this.path = path;
+};
+
+WebApplication.prototype.start = function(){
+    if(this.servletContext != null)
+    {
+        this.servletContext.load();
+    }
 };
 
 WebApplication.prototype.setHost = function(host){
@@ -409,6 +464,14 @@ WebApplication.prototype.setPath = function(path){
 
 WebApplication.prototype.getPath = function(){
     return this.path;
+};
+
+WebApplication.prototype.getWebApplicationContext = function(){
+    return WebApplicationContext;
+};
+
+WebApplication.prototype.getServletContext = function(){
+    return this.servletContext;
 };
 
 WebApplication.prototype.setSessionTimeout = function(timeout){
@@ -490,6 +553,15 @@ WebApplication.prototype.dispatch = function(req, res){
         res.setHeader("Accept-Ranges", "bytes");
         res.setHeader("Content-type", "text/html");
 
+        var servletContext = this.getServletContext();
+
+        if(servletContext.running() == false)
+        {
+            res.writeHead(404, "Not Found", {"ContentType": "text/html"});
+            res.end("<h1 error=\"10002\">Request URL: " + req.url + " not found !");
+            return;
+        }
+
         var request = this.getRequest(req, res);
         var response = this.getResponse(req, res);
         var servletChain = this.servletContext.getServletChain(url.pathname);
@@ -550,9 +622,16 @@ WebApplication.prototype.dispatch = function(req, res){
 
     if(exception != null)
     {
-        response.writeHead(500, "Internal Server Error", {"Content-type": "text/html"});
-        response.end("<h4>" + exception.name + ": " + exception.message + "</h4>");
-        return;
+        try
+        {
+            response.writeHead(500, "Internal Server Error", {"Content-type": "text/html"});
+            response.end("<h4>" + exception.name + ": " + exception.message + "</h4>");
+            return;
+        }
+        catch(e)
+        {
+            console.log("Exception: " + e);
+        }
     }
 };
 
@@ -599,7 +678,7 @@ WebApplication.prototype.execute = function(request, response, servletChain){
     }
     else
     {
-        response.writeHead(404, "Not Found", {"ContentType": "text/plain"});
+        response.writeHead(404, "Not Found", {"ContentType": "text/html"});
         response.end("<h1 error=\"10002\">Request URL: " + request.url + " not found !");
         return 404;
     }
@@ -725,6 +804,13 @@ ServletContext.prototype.set = function(name, pattern, service){
 };
 
 /**
+ * @return WebApplication
+ */
+ServletContext.prototype.getWebApplication = function(){
+    return this.webApplication;
+};
+
+/**
  * @return String
  */
 ServletContext.prototype.getContextPath = function(){
@@ -796,9 +882,10 @@ ServletContext.prototype.getRequestDispatcher = function(path){
     return null;
 };
 
-/**
- * TODO: reload
- */
+ServletContext.prototype.running = function(){
+    return this.status == 2;
+};
+
 ServletContext.prototype.load = function(){
     if(this.status != 0)
     {
@@ -1147,7 +1234,7 @@ FileWatchDog.prototype.watch = function(){
             }
         }
 
-        if(f1 != null)
+        if(f1 != null || list.length != temp.length)
         {
             this.list = temp;
             this.listener(f1, f2);
