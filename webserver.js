@@ -269,7 +269,7 @@ WebServer.prototype.dispatch = function(request, response){
         else
         {
             response.statusCode = 404;
-            response.end("<h1 error=\"10001\">Request URL: " + request.requestURL + " not found !");
+            response.end("<h1 error=\"10001\">Request URL: " + request.requestURL + " not found !</h1>");
         }
     }
     catch(e)
@@ -343,6 +343,11 @@ VistualHost.prototype.getWebApplication = function(request){
         }
 
         var prefix = this.applications[i].path + "/";
+
+        if(uri == this.applications[i].path)
+        {
+            return this.applications[i];
+        }
 
         if(uri.length >= prefix.length && uri.substring(0, prefix.length) == prefix)
         {
@@ -584,7 +589,7 @@ WebApplication.prototype.dispatch = function(req, res){
         if(servletContext.running() == false)
         {
             res.writeHead(404, "Not Found", {"ContentType": "text/html"});
-            res.end("<h1 error=\"10002\">Request URL: " + req.url + " not found !");
+            res.end("<h1 error=\"10002\">Request URL: " + req.url + " not found !</h1>");
             return;
         }
 
@@ -705,7 +710,7 @@ WebApplication.prototype.execute = function(request, response, servletChain){
     else
     {
         response.writeHead(404, "Not Found", {"ContentType": "text/html"});
-        response.end("<h1 error=\"10002\">Request URL: " + request.url + " not found !");
+        response.end("<h1 error=\"10002\">Request URL: " + request.url + " not found !</h1>");
         return 404;
     }
 };

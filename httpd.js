@@ -230,6 +230,16 @@ Httpd.prototype.service = function(request, response){
         uri = uri.substring(this.path.length);
     }
 
+    /**
+     * contextPath: /app2
+     * http://localhost/app2
+     * uri: /app2, path: /app2
+     */
+    if(uri == this.path)
+    {
+        uri = "/";
+    }
+
     var homePath = fs.realpathSync(this.home);
     var realPath = path.join(homePath, path.normalize(uri));
 
@@ -243,7 +253,7 @@ Httpd.prototype.service = function(request, response){
     if(fs.existsSync(realPath) == false)
     {
         response.writeHead(404, "Not Found", {"Content-Type": "text/html"});
-        response.end("<h1 error=\"httpd.404\">Request URL: " + request.url + " not found !");
+        response.end("<h1 error=\"httpd.404\">Request URL: " + request.url + " not found !</h1>");
         return;
     }
 

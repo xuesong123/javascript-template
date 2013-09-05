@@ -65,7 +65,7 @@ h3{margin-top: 10px;}
             <td style="width: 200px;" test="1">
         </c:if>
         <div>rows: ${rows}, rowNum: ${rowNum}, status.index: ${status.index}</div>
-        <div>user.userName: <a href="/user/${user.userId}.html">${user.userName}</a></div>
+        <div>user.userName: <a href="${contextPath}/user/${user.userId}.html">${user.userName}</a></div>
         <div>user.birthday: <fmt:formatDate value="${user.birthday}" pattern="yyyy-MM-dd HH:mm:ss SSS"/></div>
         </td>
         <!-- ${status.index} ${(status.index + 1) % 2} -->

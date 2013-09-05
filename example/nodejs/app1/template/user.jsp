@@ -6,11 +6,10 @@
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Cache-Control" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
-<link rel="stylesheet" type="text/css" href="console/css/console.css"/>
 </head>
 <body>
 <t:include file="/include/common/header.jsp"/>
-<p><a href="/userlist/1.html">userlist</a></p>
+<p><a href="${contextPath}/userlist/1.html">userlist</a></p>
 <h4>user.userId: ${user.userId}</h4>
 <h4>user.userName: ${user.userName}</h4>
 <h4>user.userAge: ${user.userAge}</h4>

@@ -6,38 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Cache-Control" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
-<style type="text/css">
-body{font-size: 14px;}
-table{
-    width: 100%;
-    border-spacing: 0px 0px;
-    border-collapse: collapse;
-    background-color: #ffffff;
-}
-
-table, table td, table th{
-    border: 1px #cdcdcd solid;
-    border-collapse: collapse;
-}
-
-table tr td{padding-left: 4px;}
-
-table.highlight tr.old{
-    background-color: #ffffff;
-}
-
-table.highlight tr.even{
-    background-color: #f9f9f9;
-}
-
-table.highlight tr.hover{
-    background-color: #e8f5fe;
-}
-
-table.highlight tr.clicked{
-    background-color: #ffffdd;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="${contextPath}/resource/css/style.css"/>
 </head>
 <body>
 <t:include file="/include/common/header.jsp"/>
@@ -55,7 +24,7 @@ table.highlight tr.clicked{
             <tr>
                 <td>${servletContext.host}</td>
                 <td>${servletContext.getRealPath("/")}</td>
-                <td>${servletContext.path}</td>
+                <td><a href="${servletContext.path}" target="_blank">${servletContext.path}</a></td>
                 <td title="watchStatus: ${servletContext.watchStatus}">
                     <c:choose>
                         <c:when test="${servletContext.watchStatus == 0}"><span style="color: #ff0000;">stoped</span></c:when>
