@@ -76,11 +76,11 @@ h3{margin-top: 10px;}
 
 <div style="height: 20px;"></div>
 <div class="scrollpage">
-    <app:scrollpage pageNum="${pageNum}" pageSize="${pageSize}" total="${userCount}" className="pagebar" href="/user/userList.do?pageNum=%s"/>
+    <app:scrollpage pageNum="${pageNum}" pageSize="${pageSize}" total="${userCount}" className="pagebar" href="${contextPath}/user/userList.do?pageNum=%s"/>
 </div>
 
 <div class="scrollpage">
-    <app:scrollpage pageNum="${pageNum}" pageSize="${pageSize}" total="${userCount}" className="pagebar" href="/userlist/%s.html"/>
+    <app:scrollpage pageNum="${pageNum}" pageSize="${pageSize}" total="${userCount}" className="pagebar" href="${contextPath}/userlist/%s.html"/>
 </div>
 
 <t:include file="/include/common/footer.jsp"/>

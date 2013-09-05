@@ -47,6 +47,15 @@ TemplateDispatcher.dispatch = function(templateContext, request, response, page)
         }
     }
 
+    var contextPath = request.getContextPath();
+
+    if(contextPath == null || contextPath == "/")
+    {
+        contextPath = "";
+    }
+
+    context["contextPath"] = contextPath;
+
     var writer = request.getAttribute("template_writer");
 
     if(writer == null)
@@ -102,7 +111,7 @@ TemplateFilter.templateContext = null;
 
 TemplateFilter.init = function(servletContext){
     console.log("[TemplateFilter]: work - " + servletContext.getRealPath(this.home));
-    this.templateContext = new ayada.TemplateContext(servletContext.getRealPath(this.home), 30);
+    this.templateContext = new ayada.TemplateContext(servletContext.getRealPath(this.home), 0 /* 300 */);
 };
 
 /**

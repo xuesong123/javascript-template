@@ -511,6 +511,11 @@ WebApplication.prototype.getRequest = function(request, response){
     request.response = response;
     response.request = request;
 
+    /**
+     * requestURL: http://localhost/app1/test.jsp
+     * requestURI: /app1/test.jsp
+     * requestURI: ${contextPath}/test.jsp
+     */
     request.attributes = {};
     request.originalURL = url.path;
     request.requestURL = url.path;

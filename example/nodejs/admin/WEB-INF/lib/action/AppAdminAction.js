@@ -43,7 +43,7 @@ mapping["list"] = {"pattern": "/admin/list.do"};
 AppAdminAction.prototype.list = function(){
     var servletContextList = this.getServletContextList();
     this.request.setAttribute("servletContextList", servletContextList);
-    this.forward("/template/servletContextList.jsp");
+    this.forward("/template/index.jsp");
 };
 
 mapping["restart"] = {"pattern": "/admin/restart.do"};

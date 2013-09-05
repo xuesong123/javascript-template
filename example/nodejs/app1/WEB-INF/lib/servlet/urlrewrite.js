@@ -33,7 +33,13 @@ UrlRewriteDispatcher.service = function(request, response, servletChain){
 
 UrlRewriteDispatcher.dispatch = function(request, response, servletChain){
     var requestURI = request.requestURI;
+    var contextPath = request.getContextPath();
     var rules = this.rules;
+
+    if(contextPath != null && contextPath != "/")
+    {
+        requestURI = requestURI.substring(contextPath.length);
+    }
 
     for(var i = 0, length = rules.length; i < length; i++)
     {
