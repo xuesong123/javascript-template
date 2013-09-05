@@ -3,56 +3,57 @@ var path = require("path");
 var http = require("http");
 var july = require("../../webserver.js");
 
-var webServer = july.Bootstrap.create("localhost|127\\.0\\.0\\.1", ".");
-webServer.start();
-
 function startServer()
 {
-    var server = (function(){
-        return http.createServer(function(request, response){
-            if(request.url == "/favicon.ico")
-            {
-                response.writeHead(404, "Not Found", {"Content-Type": "text/plain"});
-                response.end();
-                return;
-            }
-            webServer.dispatch(request, response);
+    var webServer = july.Bootstrap.create("localhost|127\\.0\\.0\\.1", ".");
+    webServer.start();
+
+    var server = http.createServer(function(request, response){
+        if(request.url == "/favicon.ico")
+        {
+            response.writeHead(404, "Not Found", {"Content-Type": "text/plain"});
+            response.end();
+            return;
+        }
+
+        if(request.url == "/exit.do")
+        {
+            response.writeHead(200, "OK", {"Content-Type": "text/html"});
+            response.write("<h1>Server stoped !</h1>");
+            response.end();
+            quit();
+            return;
+        }
+
+        webServer.dispatch(request, response);
+    });
+
+    var status = 1;
+
+    var quit = function(){
+        if(status == 0)
+        {
+            return;
+        }
+
+        console.log("[Server]: " + process.pid + " - Server stopping...");
+        webServer.shutdown();
+        console.log("[Server]: " + process.pid + " - Server stopping...");
+
+        server.close(function(){
+            console.log("[Server]: " + process.pid + " - Server stoped!");
         });
-    })();
+
+        status = 0;
+        process.exit(0);
+    };
+
+    process.on("exit", function(){
+        quit();
+    });
 
     server.listen(80, "localhost");
+    console.log("[Server]: " + process.pid + " - Server start on port: 80");
 };
 
-process.stdin.resume();
-process.stdin.setEncoding("utf8");
-process.on("exit", function(){
-    console.log("[Server]: Server stopping...");
-    webServer.shutdown();
-    // server.close();
-    console.log("[Server]: Server stoped!");
-});
-
-var cluster = require("cluster");
-var cpus = require("os").cpus().length;
-
-console.log("cpus: " + cpus);
-
-if(cluster.isMaster)
-{
-    // Fork workers.
-    for(var i = 0; i < cpus; i++)
-    {
-        cluster.fork();
-    }
-
-    cluster.on("exit", function(worker, code, signal){
-        console.log("worker " + worker.process.pid + " died!");
-    });
-}
-else
-{
-    startServer();
-}
-
-
-console.log("[Server]: Server start on port: 80");
+new july.Cluster().start(0, startServer);

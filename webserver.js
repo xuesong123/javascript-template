@@ -2244,6 +2244,44 @@ Bootstrap.create = function(host, home){
     return webServer;
 };
 
+var Cluster = function(){
+    this.clusters = [];
+};
+
+Cluster.prototype.start = function(count, handler){
+    var cluster = require("cluster");
+    var cpus = require("os").cpus().length;
+
+    if(cluster.isMaster)
+    {
+        if(count < 1)
+        {
+            count = cpus;
+        }
+
+        // Fork workers.
+        for(var i = 0; i < count; i++)
+        {
+            this.clusters.push(cluster.fork());
+        }
+
+        cluster.on("exit", function(worker, code, signal){
+            console.log("worker " + worker.process.pid + " died!");
+        });
+    }
+    else
+    {
+        handler();
+    }
+};
+
+Cluster.prototype.shutdown = function(){
+    for(var i = 0; i < this.clusters.length; i++)
+    {
+        this.clusters[i].process.exit(0);
+    }
+};
+
 if(typeof(module) != "undefined")
 {
     module.exports.WebServer = WebServer;
@@ -2254,6 +2292,7 @@ if(typeof(module) != "undefined")
     module.exports.JspServlet = JspServlet;
     module.exports.Cookie = Cookie;
     module.exports.Bootstrap = Bootstrap;
+    module.exports.Cluster = Cluster;
 }
 
 /**
