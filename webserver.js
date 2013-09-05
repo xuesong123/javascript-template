@@ -282,7 +282,7 @@ WebServer.prototype.dispatch = function(request, response){
         try
         {
             response.writeHead(500, "Internal Server Error", {"Content-type": "text/html"});
-            response.end("<h4>" + exception.name + ": " + exception.message + "</h4>");
+            response.end("<h4 error=\"1005001\">" + exception.name + ": " + exception.message + "</h4>");
             return;
         }
         catch(e)
@@ -656,7 +656,7 @@ WebApplication.prototype.dispatch = function(req, res){
         try
         {
             response.writeHead(500, "Internal Server Error", {"Content-type": "text/html"});
-            response.end("<h4>" + exception.name + ": " + exception.message + "</h4>");
+            response.end("<h4 error=\"1005002\">" + exception.name + ": " + exception.message + "</h4>");
             return;
         }
         catch(e)

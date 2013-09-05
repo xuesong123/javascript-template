@@ -261,13 +261,29 @@ Httpd.prototype.service = function(request, response){
 
     if(stats.isDirectory())
     {
-        realPath = path.join(realPath, "index.html");
-        stats = fs.statSync(realPath);
+        var indexList = ["index.htm", "index.html", "default.htm", "default.html"];
+
+        for(var i = 0; i < indexList.length; i++)
+        {
+            var tempPath = path.join(realPath, indexList[i]);
+
+            if(fs.existsSync(tempPath))
+            {
+                stats = fs.statSync(tempPath);
+
+                if(stats.isFile() == false)
+                {
+                    realPath = tempPath;
+                    break;
+                }
+            }
+        }
     }
 
     if(stats.isFile() == false)
     {
-        response.writeHead(404, "Not Found", {"Content-Type": "text/plain"});
+        response.writeHead(404, "Not Found", {"Content-Type": "text/html"});
+        response.end("<h1 error=\"httpd.404\">Request URL: " + request.url + " not found !</h1>");
         response.end();
         return;
     }
