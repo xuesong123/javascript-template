@@ -905,7 +905,7 @@ ServletContext.prototype.load = function(){
 
     var servletLib = path.join(lib, "servlet");
 
-    if(fs.existsSync(lib) == true)
+    if(fs.existsSync(servletLib) == true)
     {
         var map = {};
         var list = fs.readdirSync(servletLib);
