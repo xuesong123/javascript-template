@@ -505,7 +505,7 @@ WebApplication.prototype.getServletContext = function(){
 WebApplication.prototype.setSessionTimeout = function(timeout){
     if(this.sessionContext != null)
     {
-        this.sessionContext.timeout = timeout;
+        this.sessionContext.setTimeout(timeout);
     }
 };
 
@@ -1942,7 +1942,7 @@ function SessionContext(timeout){
     this.index = 1;
     this.count = 0;
     this.SESSIONID = "jsessionid";
-    this.timeout = timeout;
+    this.timeout = timeout * 1000;
     this.sessions = {};
 };
 
@@ -1957,7 +1957,7 @@ SessionContext.prototype.create = function(response){
     }
 
     var sessionId = [new Date().getTime(), this.index].join("");
-    var expires = new Date().getTime() + this.timeout * 1000;
+    var expires = new Date().getTime() + this.timeout;
     var httpSession = new HttpSession(sessionId);
 
     this.sessions[sessionId] = httpSession;
@@ -1985,7 +1985,7 @@ SessionContext.prototype.update = function(request, response){
     if(session != null)
     {
         session.update();
-        var expires = session.updateTime.getTime() + this.timeout * 1000;
+        var expires = session.updateTime.getTime() + this.timeout;
         response.setCookie({"name": this.SESSIONID, "value": session.sessionId, "path": "/", "expires": expires});
     }
 };
@@ -2017,7 +2017,7 @@ SessionContext.prototype.getSession = function(arg){
 
         if(session != null)
         {
-            if((new Date().getTime() - session.updateTime.getTime()) > this.timeout * 1000)
+            if((new Date().getTime() - session.updateTime.getTime()) > this.timeout)
             {
                 this.count--;
                 this.remove(sessionId);
@@ -2042,7 +2042,7 @@ SessionContext.prototype.remove = function(sessionId){
  * clear SessionContext
  */
 SessionContext.prototype.task = function(){
-    var timeout = this.timeout * 1000;
+    var timeout = this.timeout;
     var timemillis = new Date().getTime();
     var sessions = this.sessions;
     var count = 0;
@@ -2066,7 +2066,7 @@ SessionContext.prototype.task = function(){
  * @param timeout
  */
 SessionContext.prototype.setTimeout = function(timeout){
-    this.timeout = timeout;
+    this.timeout = timeout * 1000;
 };
 
 /**
@@ -2089,7 +2089,7 @@ SessionContextFactory.create = function(timeout){
 
     if(timeout == null || isNaN(timeout) || timeout < 1)
     {
-        sessionContext.timeout = 10 * 60 * 60;
+        sessionContext.setTimeout(10 * 60 * 60);
     }
 
     return sessionContext;
