@@ -56,5 +56,4 @@ function startServer()
     server.listen(80, "localhost");
     console.log("[Server]: " + process.pid + " - Server start on port: 80");
 };
-
 startServer();

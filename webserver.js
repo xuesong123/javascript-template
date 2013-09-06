@@ -168,6 +168,21 @@ DateUtil.toString = function(date){
     return a.join("");
 };
 
+var LogUtil = {};
+
+LogUtil.info = function(){
+    var args = [];
+    args.push(DateUtil.toString(new Date()));
+    args.push("-");
+
+    for(var i = 0; i < arguments.length; i++)
+    {
+        args[args.length] = arguments[i];
+    }
+
+    console.log.apply(console, args);
+};
+
 /**
  * $RCSfile: Iterator.js,v $$
  * $Revision: 1.1 $
@@ -287,7 +302,7 @@ WebServer.prototype.dispatch = function(request, response){
         }
         catch(e)
         {
-            console.log("Exception: " + e);
+            LogUtil.info("Exception: " + e);
             console.trace();
         }
     }
@@ -663,7 +678,7 @@ WebApplication.prototype.dispatch = function(req, res){
         }
         catch(e)
         {
-            console.log("Exception: " + e);
+            LogUtil.info("Exception: " + e);
             console.trace();
         }
     }
@@ -1044,7 +1059,7 @@ ServletContext.prototype.load = function(){
         this.status = 1;
 
         var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
-        console.log([
+        LogUtil.info([
             "********************************************",
             "*                                          *",
             "*           ServletContext.load            *",
@@ -1062,7 +1077,7 @@ ServletContext.prototype.load = function(){
         {
             for(var i = 0; i < packages.length; i++)
             {
-                console.log("[ServletContext]: scan " + path.join(lib, packages[i]));
+                LogUtil.info("[ServletContext]: scan " + path.join(lib, packages[i]));
                 this.getServlets(path.join(lib, packages[i]), map);
             }
         }
@@ -1107,11 +1122,11 @@ ServletContext.prototype.load = function(){
         this.watch();
         this.status = 2;
         this.webConfig = webConfig;
-        console.log(this.toString());
+        LogUtil.info(this.toString());
     }
     catch(e)
     {
-        console.log(e);
+        LogUtil.info(e);
         console.trace();
         this.destroy();
     }
@@ -1125,7 +1140,7 @@ ServletContext.prototype.destroy = function(){
     {
         this.status = 3;
         var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
-        console.log([
+        LogUtil.info([
             "********************************************",
             "*                                          *",
             "*          ServletContext.destroy          *",
@@ -1158,7 +1173,7 @@ ServletContext.prototype.destroy = function(){
                 if(require.cache[i] != null)
                 {
                     delete require.cache[i];
-                    console.log("[ServletContext]: DELETE MODUL: " + i);
+                    LogUtil.info("[ServletContext]: DELETE MODUL: " + i);
                 }
             }
         }
@@ -1174,7 +1189,7 @@ ServletContext.prototype.destroy = function(){
                 if(require.cache[file] != null)
                 {
                     delete require.cache[file];
-                    console.log("[ServletContext]: DELETE MODUL: " + file);
+                    LogUtil.info("[ServletContext]: DELETE MODUL: " + file);
                 }
             }
         });
@@ -1182,11 +1197,10 @@ ServletContext.prototype.destroy = function(){
         this.context = {};
         this.webConfig = null;
         this.status = 0;
-        console.log("");
     }
     catch(e)
     {
-        console.log(e);
+        LogUtil.info(e);
         console.trace();
     }
 };
@@ -1213,7 +1227,7 @@ ServletContext.prototype.getFileWatchDog = function(){
         };
 
         var listener = function(f1, f2){
-            console.log("f1: " + f1 + ", f2: " + f2);
+            LogUtil.info("f1: " + f1 + ", f2: " + f2);
             instance.reload();
         };
 
@@ -1350,7 +1364,7 @@ FileWatchDog.prototype.watch = function(){
         var f2 = null;
         var temp = [];
 
-        console.log("[WATCH-DOG]: watch - " + this.home);
+        LogUtil.info("[WATCH-DOG]: watch - " + this.home);
         this.handler(this.home, temp);
 
         for(var i = 0, length = Math.min(list.length, temp.length); i < length; i++)
@@ -2384,7 +2398,7 @@ Cluster.prototype.start = function(count, handler){
         }
 
         cluster.on("exit", function(worker, code, signal){
-            console.log("worker " + worker.process.pid + " died!");
+            LogUtil.info("worker " + worker.process.pid + " died!");
         });
     }
     else
