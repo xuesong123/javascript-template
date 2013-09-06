@@ -288,6 +288,7 @@ WebServer.prototype.dispatch = function(request, response){
         catch(e)
         {
             console.log("Exception: " + e);
+            console.trace();
         }
     }
 };
@@ -663,6 +664,7 @@ WebApplication.prototype.dispatch = function(req, res){
         catch(e)
         {
             console.log("Exception: " + e);
+            console.trace();
         }
     }
 };
