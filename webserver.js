@@ -1038,140 +1038,157 @@ ServletContext.prototype.load = function(){
         this.destroy();
     }
 
-    this.index++;
-    this.status = 1;
-
-    var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
-    console.log([
-        "********************************************",
-        "*                                          *",
-        "*           ServletContext.load            *",
-        "*                                          *",
-        "********************************************",
-        "[ServletContext]: " + this.index + " Load ServletContext: " + lib
-    ].join("\r\n"));
-
-    var map = {};
-    var webConfig = this.getWebConfig(true);
-    var packages = webConfig.packages;
-    var servletChain = webConfig.servletChain;
-
-    if(packages != null)
+    try
     {
-        for(var i = 0; i < packages.length; i++)
-        {
-            console.log("[ServletContext]: scan " + path.join(lib, packages[i]));
-            this.getServlets(path.join(lib, packages[i]), map);
-        }
-    }
+        this.index++;
+        this.status = 1;
 
-    /**
-     * init servlet
-     */
-    for(var name in map)
-    {
-        var servlet = map[name];
+        var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
+        console.log([
+            "********************************************",
+            "*                                          *",
+            "*           ServletContext.load            *",
+            "*                                          *",
+            "********************************************",
+            "[ServletContext]: " + this.index + " Load ServletContext: " + lib
+        ].join("\r\n"));
 
-        if(typeof(servlet) == "object")
+        var map = {};
+        var webConfig = this.getWebConfig(true);
+        var packages = webConfig.packages;
+        var servletChain = webConfig.servletChain;
+
+        if(packages != null)
         {
-            if(servlet.init != null)
+            for(var i = 0; i < packages.length; i++)
             {
-                servlet.init(this);
+                console.log("[ServletContext]: scan " + path.join(lib, packages[i]));
+                this.getServlets(path.join(lib, packages[i]), map);
             }
         }
-    }
 
-    if(servletChain != null)
-    {
-        var c = null;
-        var s = null;
-        for(var i = 0, length = servletChain.length; i < length; i++)
+        /**
+         * init servlet
+         */
+        for(var name in map)
         {
-            c = servletChain[i];
-            s = map[c.servlet];
+            var servlet = map[name];
 
-            if(s == null)
+            if(typeof(servlet) == "object")
             {
-                throw new Error("servlet \"" + c.servlet + "\ not exists!");
+                if(servlet.init != null)
+                {
+                    servlet.init(this);
+                }
             }
-
-            this.set("_servlet_" + i, c.pattern, s);
         }
+
+        if(servletChain != null)
+        {
+            var c = null;
+            var s = null;
+            for(var i = 0, length = servletChain.length; i < length; i++)
+            {
+                c = servletChain[i];
+                s = map[c.servlet];
+
+                if(s == null)
+                {
+                    throw new Error("servlet \"" + c.servlet + "\ not exists!");
+                }
+
+                this.set("_servlet_" + i, c.pattern, s);
+            }
+        }
+
+        var sessionTimeout = webConfig.sessionConfig.sessionTimeout;
+        this.getSessionContext().setTimeout(sessionTimeout);
+
+        this.watch();
+        this.status = 2;
+        this.webConfig = webConfig;
+        console.log(this.toString());
     }
-
-    var sessionTimeout = webConfig.sessionConfig.sessionTimeout;
-    this.getSessionContext().setTimeout(sessionTimeout);
-
-    this.watch();
-    this.status = 2;
-    this.webConfig = webConfig;
-    console.log(this.toString());
+    catch(e)
+    {
+        console.log(e);
+        console.trace();
+        this.destroy();
+    }
 };
 
 /**
  * destroy all servlet
  */
 ServletContext.prototype.destroy = function(){
-    this.status = 3;
-    var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
-    console.log([
-        "********************************************",
-        "*                                          *",
-        "*          ServletContext.destroy          *",
-        "*                                          *",
-        "********************************************",
-        "[ServletContext]: " + this.index + " Destroy ServletContext: " + lib
-    ].join("\r\n"));
-
-    this.unwatch();
-
-    /**
-     * destroy servlet
-     */
-    for(var name in this.context)
+    try
     {
-        var servlet = this.context[name].servlet;
+        this.status = 3;
+        var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
+        console.log([
+            "********************************************",
+            "*                                          *",
+            "*          ServletContext.destroy          *",
+            "*                                          *",
+            "********************************************",
+            "[ServletContext]: " + this.index + " Destroy ServletContext: " + lib
+        ].join("\r\n"));
 
-        if(servlet.destroy != null)
+        this.unwatch();
+
+        /**
+         * destroy servlet
+         */
+        for(var name in this.context)
         {
-            servlet.destroy();
-        }
-    }
+            var servlet = this.context[name].servlet;
 
-    var cache = require.cache;
-
-    for(var i in cache)
-    {
-        if(StringUtil.startsWith(i, this.getRealPath("/")))
-        {
-            if(require.cache[i] != null)
+            if(servlet.destroy != null)
             {
-                delete require.cache[i];
-                console.log("[ServletContext]: DELETE MODUL: " + i);
+                servlet.destroy();
             }
         }
-    }
 
-    /**
-     * delete require cache
-     */
-    FileIterator.each(lib, function(file){
-        var stats = fs.statSync(file);
+        var cache = require.cache;
 
-        if(stats.isFile())
+        for(var i in cache)
         {
-            if(require.cache[file] != null)
+            if(StringUtil.startsWith(i, this.getRealPath("/")))
             {
-                delete require.cache[file];
-                console.log("[ServletContext]: DELETE MODUL: " + file);
+                if(require.cache[i] != null)
+                {
+                    delete require.cache[i];
+                    console.log("[ServletContext]: DELETE MODUL: " + i);
+                }
             }
         }
-    });
 
-    this.context = {};
-    this.webConfig = null;
-    this.status = 0;
-    console.log("");
+        /**
+         * delete require cache
+         */
+        FileIterator.each(lib, function(file){
+            var stats = fs.statSync(file);
+
+            if(stats.isFile())
+            {
+                if(require.cache[file] != null)
+                {
+                    delete require.cache[file];
+                    console.log("[ServletContext]: DELETE MODUL: " + file);
+                }
+            }
+        });
+
+        this.context = {};
+        this.webConfig = null;
+        this.status = 0;
+        console.log("");
+    }
+    catch(e)
+    {
+        console.log(e);
+        console.trace();
+    }
 };
 
 ServletContext.prototype.getFileWatchDog = function(){
