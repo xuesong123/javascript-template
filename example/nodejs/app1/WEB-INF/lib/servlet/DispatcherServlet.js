@@ -1,16 +1,17 @@
 var fs = require("fs");
 var path = require("path");
-var DispatcherServlet = {};
-DispatcherServlet.chain = null;
-DispatcherServlet.packages = ["action"];
+var DispatcherServlet = function(){
+    this.chain = [];
+    this.packages = [];
+};
 
-DispatcherServlet.init = function(servletContext){
+DispatcherServlet.prototype.init = function(servletContext){
     var home = servletContext.getRealPath("/");
-    var chain = [];
+    var chain = this.chain;
 
     for(var i = 0; i < this.packages.length; i++)
     {
-        var lib = path.join(home, "WEB-INF/lib/" + this.packages[i]);
+        var lib = path.join(home, "WEB-INF/module/" + this.packages[i]);
 
         if(fs.existsSync(lib) == true)
         {
@@ -45,13 +46,22 @@ DispatcherServlet.init = function(servletContext){
             }
         }
     }
-
-    this.chain = chain;
 };
 
-DispatcherServlet.service = function(request, response, servletChain){
-    var requestURI = request.requestURI;
+DispatcherServlet.prototype.service = function(request, response, servletChain){
     var chain = this.chain;
+    var requestURI = request.requestURI;
+    var contextPath = request.getContextPath();
+
+    if(contextPath != null && contextPath != "/")
+    {
+        requestURI = requestURI.substring(contextPath.length);
+    }
+
+    if(requestURI == "")
+    {
+        requestURI = "/";
+    }
 
     for(var i = 0; i < chain.length; i++)
     {

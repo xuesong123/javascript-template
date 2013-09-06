@@ -95,29 +95,22 @@ ayada.TemplateFactory.getSource = function(home, page, encoding){
  * This software is the proprietary information of Skin, Inc.
  * Use is subject to license terms.
  */
-var TemplateFilter = {};
+var TemplateFilter = function(){
+    this.home = "/template";
+    this.dispatcher = ["FORWARD"];
+    this.templateContext = null;
+    this.expires = 0;
+};
 
-TemplateFilter.dispatcher = ["FORWARD"];
-
-/**
- * current work directory
- */
-TemplateFilter.home = "/template";
-
-/**
- * current template context
- */
-TemplateFilter.templateContext = null;
-
-TemplateFilter.init = function(servletContext){
+TemplateFilter.prototype.init = function(servletContext){
     console.log("[TemplateFilter]: work - " + servletContext.getRealPath(this.home));
-    this.templateContext = new ayada.TemplateContext(servletContext.getRealPath(this.home), 0 /* 300 */);
+    this.templateContext = new ayada.TemplateContext(servletContext.getRealPath(this.home), this.expires);
 };
 
 /**
  * @Override
  */
-TemplateFilter.service = function(request, response, servletChain){
+TemplateFilter.prototype.service = function(request, response, servletChain){
     var requestURI = request.requestURI;
 
     if(this.home != null && this.home.length > 1)

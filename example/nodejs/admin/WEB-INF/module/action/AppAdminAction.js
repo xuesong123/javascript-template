@@ -39,14 +39,14 @@ AppAdminAction.prototype.getServletContext = function(contextPath){
 
 var mapping = {};
 
-mapping["list"] = {"pattern": "/admin/list.do"};
+mapping["list"] = {"pattern": "^/$|^/index.do$|^/list.do$"};
 AppAdminAction.prototype.list = function(){
     var servletContextList = this.getServletContextList();
     this.request.setAttribute("servletContextList", servletContextList);
     this.forward("/template/index.jsp");
 };
 
-mapping["restart"] = {"pattern": "/admin/restart.do"};
+mapping["restart"] = {"pattern": "^/restart.do$"};
 AppAdminAction.prototype.restart = function(){
     var contextPath = this.request.getParameter("contextPath");
     var servletContext = this.getServletContext(contextPath);
@@ -56,10 +56,10 @@ AppAdminAction.prototype.restart = function(){
         servletContext.restart();
     }
 
-    this.response.redirect("/admin/list.do");
+    this.response.redirect(this.request.getContextPath() + "/list.do");
 };
 
-mapping["shutdown"] = {"pattern": "/admin/shutdown.do"};
+mapping["shutdown"] = {"pattern": "^/shutdown.do$"};
 AppAdminAction.prototype.shutdown = function(){
     var contextPath = this.request.getParameter("contextPath");
     var servletContext = this.getServletContext(contextPath);
@@ -84,10 +84,10 @@ AppAdminAction.prototype.shutdown = function(){
         }
     }
 
-    this.response.redirect("/admin/list.do");
+    this.response.redirect(this.request.getContextPath() + "/list.do");
 };
 
-mapping["watch"] = {"pattern": "/admin/watch.do"};
+mapping["watch"] = {"pattern": "^/watch.do$"};
 AppAdminAction.prototype.watch = function(){
     var contextPath = this.request.getParameter("contextPath");
     var servletContext = this.getServletContext(contextPath);
@@ -97,10 +97,10 @@ AppAdminAction.prototype.watch = function(){
         servletContext.watch();
     }
 
-    this.response.redirect("/admin/list.do");
+    this.response.redirect(this.request.getContextPath() + "/list.do");
 };
 
-mapping["unwatch"] = {"pattern": "/admin/unwatch.do"};
+mapping["unwatch"] = {"pattern": "^/unwatch.do$"};
 AppAdminAction.prototype.unwatch = function(){
     var contextPath = this.request.getParameter("contextPath");
     var servletContext = this.getServletContext(contextPath);
@@ -114,7 +114,7 @@ AppAdminAction.prototype.unwatch = function(){
 };
 
 /* http://localhost/admin/test/1/2/3.html */
-mapping["test"] = {"pattern": "/admin/test/(\\d+)/(\\d+)/(\\d+)\\.html$"};
+mapping["test"] = {"pattern": "^/test/(\\d+)/(\\d+)/(\\d+)\\.html$"};
 AppAdminAction.prototype.test = function(arg1, arg2, arg3){
     this.response.write("<h3>" + arg1 + ", " + arg2 + ", " + arg3 + "</h3>");
     this.response.end();

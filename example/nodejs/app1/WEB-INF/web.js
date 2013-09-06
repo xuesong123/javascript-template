@@ -1,7 +1,7 @@
-var servletConfig = {"chain": []};
+var servletConfig = {"servletChain": []};
 
 servletConfig.set = function(pattern, servlet){
-    this.chain.push({"pattern": pattern, "servlet": servlet});
+    this.servletChain.push({"pattern": pattern, "servlet": servlet});
 };
 
 servletConfig.set("/*",                         "urlrewrite");
@@ -10,6 +10,8 @@ servletConfig.set("/template/*",                "TemplateFilter");
 servletConfig.set("/user/userList.do",          "UserListServlet");
 servletConfig.set("/user/user.do",              "UserServlet");
 servletConfig.set("/test/exceptionTest.do",     "ExceptionServlet");
+
+servletConfig.packages = ["servlet"];
 
 if(typeof(module) != "undefined")
 {

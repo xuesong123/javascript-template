@@ -917,29 +917,37 @@ ServletContext.prototype.running = function(){
     return this.status == 2;
 };
 
-ServletContext.prototype.load = function(){
-    if(this.status != 0)
+/**
+ * @param path - absolute path
+ * @return RequestDispatcher
+ */
+ServletContext.prototype.getWebConfig = function(){
+    var webjs = this.getRealPath("/WEB-INF/web.js");
+
+    /**
+     * push servlet
+     */
+    if(fs.existsSync(webjs) == true)
     {
-        this.destroy();
+        var stats = fs.statSync(webjs);
+
+        if(stats.isFile())
+        {
+            return require(webjs).servletConfig;
+        }
     }
 
-    this.index++;
-    this.status = 1;
+    return {};
+};
 
-    var lib = path.join(this.getRealPath("/"), "WEB-INF/lib");
-    console.log("********************************************");
-    console.log("*                                          *");
-    console.log("*           ServletContext.load            *");
-    console.log("*                                          *");
-    console.log("********************************************");
-    console.log("[ServletContext]: " + this.index + " Load ServletContext: " + lib);
-
-    var servletLib = path.join(lib, "servlet");
-
-    if(fs.existsSync(servletLib) == true)
+/**
+ * @param path - absolute path
+ * @return RequestDispatcher
+ */
+ServletContext.prototype.getServlets = function(lib, map){
+    if(fs.existsSync(lib) == true)
     {
-        var map = {};
-        var list = fs.readdirSync(servletLib);
+        var list = fs.readdirSync(lib);
 
         /**
          * build servlet
@@ -947,7 +955,7 @@ ServletContext.prototype.load = function(){
         for(var i = 0, length = list.length; i < length; i++)
         {
             var fileName = list[i];
-            var filePath = path.join(servletLib, fileName);
+            var filePath = path.join(lib, fileName);
             var stats = fs.statSync(filePath);
 
             if(stats.isFile())
@@ -974,60 +982,75 @@ ServletContext.prototype.load = function(){
             {
             }
         }
+    }
 
-        /**
-         * init servlet
-         */
-        for(var name in map)
+    return map;
+};
+
+ServletContext.prototype.load = function(){
+    if(this.status != 0)
+    {
+        this.destroy();
+    }
+
+    this.index++;
+    this.status = 1;
+
+    var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
+    console.log([
+        "********************************************",
+        "*                                          *",
+        "*           ServletContext.load            *",
+        "*                                          *",
+        "********************************************",
+        "[ServletContext]: " + this.index + " Load ServletContext: " + lib
+    ].join("\r\n"));
+
+    var map = {};
+    var webConfig = this.getWebConfig();
+    var packages = webConfig.packages;
+    var servletChain = webConfig.servletChain;
+
+    if(packages != null)
+    {
+        for(var i = 0; i < packages.length; i++)
         {
-            var servlet = map[name];
+            console.log("[ServletContext]: scan " + path.join(lib, packages[i]));
+            this.getServlets(path.join(lib, packages[i]), map);
+        }
+    }
 
-            if(typeof(servlet) == "object")
+    /**
+     * init servlet
+     */
+    for(var name in map)
+    {
+        var servlet = map[name];
+
+        if(typeof(servlet) == "object")
+        {
+            if(servlet.init != null)
             {
-                if(servlet.init != null)
-                {
-                    servlet.init(this);
-                }
+                servlet.init(this);
             }
         }
+    }
 
-        var webjs = path.join(lib, "web.js");
-
-        /**
-         * push servlet
-         */
-        if(fs.existsSync(webjs) == true)
+    if(servletChain != null)
+    {
+        var c = null;
+        var s = null;
+        for(var i = 0, length = servletChain.length; i < length; i++)
         {
-            var stats = fs.statSync(webjs);
-            var servletConfig = null;
+            c = servletChain[i];
+            s = map[c.servlet];
 
-            if(stats.isFile())
+            if(s == null)
             {
-                servletConfig = require(webjs).servletConfig;
+                throw new Error("servlet \"" + c.servlet + "\ not exists!");
             }
 
-            if(servletConfig != null)
-            {
-                var chain = servletConfig.chain;
-
-                if(chain != null)
-                {
-                    var c = null;
-                    var s = null;
-                    for(var i = 0, length = chain.length; i < length; i++)
-                    {
-                        c = chain[i];
-                        s = map[c.servlet];
-
-                        if(s == null)
-                        {
-                            throw new Error("servlet \"" + c.servlet + "\ not exists!");
-                        }
-
-                        this.set("_servlet_" + i, c.pattern, s);
-                    }
-                }
-            }
+            this.set("_servlet_" + i, c.pattern, s);
         }
     }
 
@@ -1041,13 +1064,15 @@ ServletContext.prototype.load = function(){
  */
 ServletContext.prototype.destroy = function(){
     this.status = 3;
-    var lib = path.join(this.getRealPath("/"), "WEB-INF/lib");
-    console.log("********************************************");
-    console.log("*                                          *");
-    console.log("*          ServletContext.destroy          *");
-    console.log("*                                          *");
-    console.log("********************************************");
-    console.log("[ServletContext]: " + this.index + " Destroy ServletContext: " + lib);
+    var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
+    console.log([
+        "********************************************",
+        "*                                          *",
+        "*          ServletContext.destroy          *",
+        "*                                          *",
+        "********************************************",
+        "[ServletContext]: " + this.index + " Destroy ServletContext: " + lib
+    ].join("\r\n"));
 
     this.unwatch();
 
@@ -1099,26 +1124,47 @@ ServletContext.prototype.destroy = function(){
     console.log("");
 };
 
-ServletContext.prototype.watch = function(){
-    var lib = path.join(this.getRealPath("/"), "WEB-INF/lib");
-
+ServletContext.prototype.getFileWatchDog = function(){
     if(this.fileWatchDog == null)
     {
         var instance = this;
-        this.fileWatchDog = new FileWatchDog(lib, function(f1, f2){
+        var webjs = this.getRealPath("/WEB-INF/web.js");
+
+        var handler = function(work, list){
+            list.push(webjs);
+
+            FileIterator.each(work, function(file){
+                var stats = fs.statSync(file);
+
+                if(stats.isFile())
+                {
+                    list.push({"file": file, "lastModified": stats.mtime.getTime()});
+                }
+            });
+
+            return list;
+        };
+
+        var listener = function(f1, f2){
             console.log("f1: " + f1 + ", f2: " + f2);
             instance.reload();
-        });
+        };
+
+        this.fileWatchDog = new FileWatchDog(this.getRealPath("/WEB-INF/module"), handler, listener);
     }
 
-    this.fileWatchDog.watch();
+    return this.fileWatchDog;
+};
+
+ServletContext.prototype.watch = function(){
+    this.getFileWatchDog().watch();
     this.watchStatus = 1;
 };
 
 ServletContext.prototype.unwatch = function(){
     if(this.watchStatus != 0)
     {
-        this.fileWatchDog.unwatch();
+        this.getFileWatchDog().unwatch();
         this.watchStatus = 0;
     }
 };
@@ -1208,11 +1254,12 @@ FileIterator.each = function(dir, handler){
     }
 };
 
-var FileWatchDog = function(home, listener){
+var FileWatchDog = function(home, handler, listener){
     this.home = home;
     this.list = [];
     this.timer = null;
     this.interval = 60 * 1000;
+    this.handler = handler;
     this.listener = listener;
 };
 
@@ -1226,14 +1273,7 @@ FileWatchDog.prototype.watch = function(){
 
     if(this.list.length < 1)
     {
-        FileIterator.each(this.home, function(file){
-            var stats = fs.statSync(file);
-
-            if(stats.isFile())
-            {
-                list.push({"file": file, "lastModified": stats.mtime.getTime()});
-            }
-        });
+        this.handler(this.home, this.list);
     }
     else
     {
@@ -1242,15 +1282,7 @@ FileWatchDog.prototype.watch = function(){
         var temp = [];
 
         console.log("[WATCH-DOG]: watch - " + this.home);
-
-        FileIterator.each(this.home, function(file){
-            var stats = fs.statSync(file);
-
-            if(stats.isFile())
-            {
-                temp.push({"file": file, "lastModified": stats.mtime.getTime()});
-            }
-        });
+        this.handler(this.home, temp);
 
         for(var i = 0, length = Math.min(list.length, temp.length); i < length; i++)
         {

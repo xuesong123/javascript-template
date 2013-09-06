@@ -4,14 +4,8 @@ var july = require("../../webserver.js");
 /**
  * create webApplication
  */
-var webApplication = july.WebApplicationFactory.create("localhost", "webapp", "/");
+var webApplication = july.WebApplicationFactory.create("localhost", "app1", "/");
 webApplication.start();
-
-process.stdin.resume();
-process.stdin.setEncoding("utf8");
-process.on("exit", function(){
-    webApplication.shutdown();
-});
 
 var server = http.createServer(function(request, response){
     if(request.url == "/favicon.ico")
@@ -24,14 +18,15 @@ var server = http.createServer(function(request, response){
     webApplication.dispatch(request, response);
 });
 
+/*
 process.on("exit", function(){
     console.log("[Server]: Server stopping...");
-    webServer.shutdown();
+    webApplication.shutdown();
     console.log("[Server]: Server stopping...");
     server.close(function(){
         console.log("[Server]: Server stoped!");
     });
 });
-
+*/
 server.listen(80, "localhost");
 console.log("[Server]: Server start on port: 80");
