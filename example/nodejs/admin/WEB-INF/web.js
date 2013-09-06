@@ -16,11 +16,11 @@ servletConfig.set("/*",          "DispatcherServlet");
 servletConfig.set("/template/*", "TemplateFilter");
 
 servletConfig.sessionConfig = {
-    sessionTimeout: 10 * 60 * 60
+    sessionTimeout: 10 * 60
 };
 
 servletConfig.watchConfig = {
-    interval: 3 * 60 * 60
+    interval: 3 * 60
 };
 
 if(typeof(module) != "undefined")

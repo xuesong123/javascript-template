@@ -969,7 +969,7 @@ ServletContext.prototype.getWebConfig = function(create){
 
     if(this.webConfig.sessionConfig.sessionTimeout == null)
     {
-        this.webConfig.sessionConfig.sessionTimeout = 10 * 60 * 60;
+        this.webConfig.sessionConfig.sessionTimeout = 10 * 60;
     }
 
     if(this.webConfig.watchConfig == null)
@@ -979,7 +979,7 @@ ServletContext.prototype.getWebConfig = function(create){
 
     if(this.webConfig.watchConfig.interval == null)
     {
-        this.webConfig.watchConfig.interval = 3 * 60 * 60;
+        this.webConfig.watchConfig.interval = 3 * 60;
     }
 
     return this.webConfig;
@@ -1327,7 +1327,7 @@ var FileWatchDog = function(home, handler, listener){
     this.home = home;
     this.list = [];
     this.timer = null;
-    this.interval = 3 * 60 * 60 * 1000;
+    this.interval = 3 * 60 * 1000;
     this.handler = handler;
     this.listener = listener;
 };
