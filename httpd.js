@@ -271,7 +271,7 @@ Httpd.prototype.service = function(request, response){
             {
                 stats = fs.statSync(tempPath);
 
-                if(stats.isFile() == false)
+                if(stats.isFile())
                 {
                     realPath = tempPath;
                     break;

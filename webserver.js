@@ -418,6 +418,7 @@ WebApplicationFactory.create = function(host, home, path){
     webApplication.sessionContext = sessionContext;
 
     servletContext.webApplication = webApplication;
+    servletContext.sessionContext = sessionContext;
     servletContext.defaultServlet = httpd.create(host, home, path);
     servletContext.jspServlet = new JspServlet();
     WebApplicationContext.add(webApplication);
@@ -918,26 +919,68 @@ ServletContext.prototype.running = function(){
 };
 
 /**
+ * @return sessionContext
+ */
+ServletContext.prototype.getSessionContext = function(){
+    return this.sessionContext;
+};
+
+/**
  * @param path - absolute path
  * @return RequestDispatcher
  */
-ServletContext.prototype.getWebConfig = function(){
-    var webjs = this.getRealPath("/WEB-INF/web.js");
-
-    /**
-     * push servlet
-     */
-    if(fs.existsSync(webjs) == true)
+ServletContext.prototype.getWebConfig = function(create){
+    if(create == true)
     {
-        var stats = fs.statSync(webjs);
+        this.webConfig = null;
+    }
 
-        if(stats.isFile())
+    if(this.webConfig == null)
+    {
+        var webjs = this.getRealPath("/WEB-INF/web.js");
+
+        if(fs.existsSync(webjs) == true)
         {
-            return require(webjs).servletConfig;
+            var stats = fs.statSync(webjs);
+
+            if(stats.isFile())
+            {
+                this.webConfig = require(webjs).servletConfig;
+            }
         }
     }
 
-    return {};
+    if(this.webConfig == null)
+    {
+        this.webConfig = {};
+    }
+
+    if(this.webConfig.servletChain == null)
+    {
+        this.webConfig.servletChain = [];
+    }
+
+    if(this.webConfig.sessionConfig == null)
+    {
+        this.webConfig.sessionConfig = {};
+    }
+
+    if(this.webConfig.sessionConfig.sessionTimeout == null)
+    {
+        this.webConfig.sessionConfig.sessionTimeout = 10 * 60 * 60;
+    }
+
+    if(this.webConfig.watchConfig == null)
+    {
+        this.webConfig.watchConfig = {};
+    }
+
+    if(this.webConfig.watchConfig.interval == null)
+    {
+        this.webConfig.watchConfig.interval = 3 * 60 * 60;
+    }
+
+    return this.webConfig;
 };
 
 /**
@@ -1007,7 +1050,7 @@ ServletContext.prototype.load = function(){
     ].join("\r\n"));
 
     var map = {};
-    var webConfig = this.getWebConfig();
+    var webConfig = this.getWebConfig(true);
     var packages = webConfig.packages;
     var servletChain = webConfig.servletChain;
 
@@ -1054,8 +1097,12 @@ ServletContext.prototype.load = function(){
         }
     }
 
+    var sessionTimeout = webConfig.sessionConfig.sessionTimeout;
+    this.getSessionContext().setTimeout(sessionTimeout);
+
     this.watch();
     this.status = 2;
+    this.webConfig = webConfig;
     console.log(this.toString());
 };
 
@@ -1120,6 +1167,7 @@ ServletContext.prototype.destroy = function(){
     });
 
     this.context = {};
+    this.webConfig = null;
     this.status = 0;
     console.log("");
 };
@@ -1150,7 +1198,9 @@ ServletContext.prototype.getFileWatchDog = function(){
             instance.reload();
         };
 
+        var webConfig = this.getWebConfig();
         this.fileWatchDog = new FileWatchDog(this.getRealPath("/WEB-INF/module"), handler, listener);
+        this.fileWatchDog.interval = webConfig.watchConfig.interval * 1000;
     }
 
     return this.fileWatchDog;
@@ -1258,7 +1308,7 @@ var FileWatchDog = function(home, handler, listener){
     this.home = home;
     this.list = [];
     this.timer = null;
-    this.interval = 60 * 1000;
+    this.interval = 3 * 60 * 60 * 1000;
     this.handler = handler;
     this.listener = listener;
 };
@@ -1994,6 +2044,13 @@ SessionContext.prototype.task = function(){
 };
 
 /**
+ * @param timeout
+ */
+SessionContext.prototype.setTimeout = function(timeout){
+    this.timeout = timeout;
+};
+
+/**
  * $RCSfile: SessionContextFactory.js,v $$
  * $Revision: 1.1 $
  * $Date: 2012-10-18 $
@@ -2013,7 +2070,7 @@ SessionContextFactory.create = function(timeout){
 
     if(timeout == null || isNaN(timeout) || timeout < 1)
     {
-        sessionContext.timeout = 30;
+        sessionContext.timeout = 10 * 60 * 60;
     }
 
     return sessionContext;

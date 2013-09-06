@@ -48,8 +48,9 @@ function startServer()
         process.exit(0);
     };
 
-    process.on("exit", function(){
-        quit();
+    process.on("uncaughtException", function(error){
+        console.log("Caught exception: " + error);
+        console.trace();
     });
 
     server.listen(80, "localhost");
