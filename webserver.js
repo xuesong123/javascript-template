@@ -183,6 +183,8 @@ LogUtil.info = function(){
     console.log.apply(console, args);
 };
 
+global.LogUtil = LogUtil;
+
 /**
  * $RCSfile: Iterator.js,v $$
  * $Revision: 1.1 $
@@ -1077,16 +1079,16 @@ ServletContext.prototype.load = function(force){
         this.status = 1;
         var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
 
-        LogUtil.info([
-            "",
+        console.log([
             "********************************************",
             "*                                          *",
             "*           ServletContext Load            *",
             "*                                          *",
-            "********************************************",
-            "[ServletContext]: Load ServletContext: " + lib,
-            "[ServletContext]: http://" + this.host + ":80" + this.path
+            "********************************************"
         ].join("\r\n"));
+
+        LogUtil.info("[ServletContext]: Load ServletContext: " + lib);
+        LogUtil.info("[ServletContext]: http://" + this.host + ":80" + this.path);
 
         if(packages != null)
         {
@@ -1137,7 +1139,7 @@ ServletContext.prototype.load = function(force){
         this.watch();
         this.status = 2;
         this.webConfig = webConfig;
-        LogUtil.info(this.toString());
+        this.print();
     }
     catch(e)
     {
@@ -1155,15 +1157,15 @@ ServletContext.prototype.destroy = function(){
     {
         this.status = 3;
         var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
-        LogUtil.info([
-            "",
+        console.log([
             "********************************************",
             "*                                          *",
             "*          ServletContext Destroy          *",
             "*                                          *",
-            "********************************************",
-            "[ServletContext]: Destroy ServletContext: " + lib
+            "********************************************"
         ].join("\r\n"));
+
+        LogUtil.info("[ServletContext]: Destroy ServletContext: " + lib);
 
         this.unwatch();
 
@@ -1280,6 +1282,19 @@ ServletContext.prototype.restart = function(){
 
 ServletContext.prototype.shutdown = function(){
     this.destroy();
+};
+
+/**
+ * destroy all servlet
+ */
+ServletContext.prototype.print = function(){
+    var context = this.context;
+
+    for(var i in context)
+    {
+        var servletConfig = context[i];
+        LogUtil.info("[ServletContext]: " + servletConfig.name + " - " + servletConfig.pattern);
+    }
 };
 
 /**

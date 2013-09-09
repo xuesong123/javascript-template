@@ -7,7 +7,7 @@ UrlRewriteDispatcher.prototype.init = function(servletContext){
 
     for(var i = 0, length = rules.length; i < length; i++)
     {
-        console.log("[URLREWRITE]: set rule - " + rules[i].from);
+        LogUtil.info("[UrlRewriteFilter]: set rule - " + rules[i].from);
     }
 };
 

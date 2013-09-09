@@ -27,9 +27,11 @@ function startServer(args)
         server.close(function(){
             console.log("[Server]: " + process.pid + " - Server stoped!");
         });
-
-        process.exit(0);
     };
+
+    process.on("exit", function(error){
+        quit();
+    });
 
     process.on("uncaughtException", function(error){
         console.log("Caught exception: " + error);

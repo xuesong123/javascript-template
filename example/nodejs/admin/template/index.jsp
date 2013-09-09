@@ -11,7 +11,7 @@
 <body>
 <t:include file="/include/common/header.jsp"/>
 <div class="wrap">
-    <p><a href="/exit.do" style="color: #9e0000;">shutdown server</a></p>
+    <p><a href="${contextPath}/exit.do" style="color: #9e0000;">shutdown server</a></p>
     <table border="1">
         <tr>
             <td>Host</td>

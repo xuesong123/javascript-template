@@ -120,6 +120,13 @@ AppAdminAction.prototype.test = function(arg1, arg2, arg3){
     this.response.end();
 };
 
+mapping["exit"] = {"pattern": "^/exit.do$"};
+AppAdminAction.prototype.exit = function(){
+    this.response.write("<h3>Server exit !</h3>");
+    this.response.end();
+    process.exit(0);
+};
+
 AppAdminAction.mapping = mapping;
 
 if(typeof(module) != "undefined")

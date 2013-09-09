@@ -103,7 +103,7 @@ var TemplateFilter = function(){
 };
 
 TemplateFilter.prototype.init = function(servletContext){
-    console.log("[TemplateFilter]: work - " + servletContext.getRealPath(this.home));
+    LogUtil.info("[TemplateFilter]: work - " + servletContext.getRealPath(this.home));
     this.templateContext = new ayada.TemplateContext(servletContext.getRealPath(this.home), this.expires);
 };
 
