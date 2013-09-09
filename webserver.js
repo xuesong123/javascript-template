@@ -297,7 +297,9 @@ WebServer.prototype.dispatch = function(request, response){
         try
         {
             response.writeHead(500, "Internal Server Error", {"Content-type": "text/html"});
-            response.end("<h4 error=\"1005001\">" + exception.name + ": " + exception.message + "</h4>");
+            response.end("<h4 error=\"1005002\">500 Internal Server Error</h4>");
+            LogUtil.info("Exception: " + exception);
+            console.trace();
             return;
         }
         catch(e)
@@ -673,7 +675,9 @@ WebApplication.prototype.dispatch = function(req, res){
         try
         {
             response.writeHead(500, "Internal Server Error", {"Content-type": "text/html"});
-            response.end("<h4 error=\"1005002\">" + exception.name + ": " + exception.message + "</h4>");
+            response.end("<h4 error=\"1005002\">500 Internal Server Error</h4>");
+            LogUtil.info("Exception: " + exception);
+            console.trace(1);
             return;
         }
         catch(e)
@@ -766,7 +770,6 @@ function ServletContext(host, home, path){
     this.home = home;
     this.path = path;
     this.status = 0;
-    this.index = 0;
     this.watchStatus = 0;
     this.context = {};
 };
@@ -1060,9 +1063,6 @@ ServletContext.prototype.load = function(force){
 
     try
     {
-        this.index++;
-        this.status = 1;
-
         var map = {};
         var webConfig = this.getWebConfig(true);
         var packages = webConfig.packages;
@@ -1074,16 +1074,18 @@ ServletContext.prototype.load = function(force){
             return;
         }
 
+        this.status = 1;
         var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
 
         LogUtil.info([
             "",
             "********************************************",
             "*                                          *",
-            "*           ServletContext.load            *",
+            "*           ServletContext Load            *",
             "*                                          *",
             "********************************************",
-            "[ServletContext]: " + this.index + " Load ServletContext: " + lib
+            "[ServletContext]: Load ServletContext: " + lib,
+            "[ServletContext]: http://" + this.host + ":80" + this.path
         ].join("\r\n"));
 
         if(packages != null)
@@ -1157,10 +1159,10 @@ ServletContext.prototype.destroy = function(){
             "",
             "********************************************",
             "*                                          *",
-            "*          ServletContext.destroy          *",
+            "*          ServletContext Destroy          *",
             "*                                          *",
             "********************************************",
-            "[ServletContext]: " + this.index + " Destroy ServletContext: " + lib
+            "[ServletContext]: Destroy ServletContext: " + lib
         ].join("\r\n"));
 
         this.unwatch();
@@ -2385,6 +2387,225 @@ Bootstrap.create = function(host, home){
     return webServer;
 };
 
+var Options = function(args){
+    this.options = this.parse(args, {});
+};
+
+Options.prototype.trim = function(source){return (source != null ? source.replace(/(^\s*)|(\s*$)/g, "") : "");};
+Options.prototype.startsWith = function(source, search){
+    return (source.length >= search.length && source.substring(0, search.length) == search)
+};
+
+Options.prototype.parse = function(args, map){
+    var j = 0;
+    var s1 = null;
+    var s2 = null;
+    var name = null;
+    var value = null;
+
+    if(map == null)
+    {
+        map = {};
+    }
+
+    if(args == null)
+    {
+        return map;
+    }
+
+    for(var i = 0; i < args.length; i++)
+    {
+        s1 = args[i];
+
+        if(s1 != null && (s1 = this.trim(s1)).length > 0)
+        {
+            if(this.startsWith(s1, "-"))
+            {
+                j = i + 1;
+
+                if(j < args.length)
+                {
+                    s2 = args[j];
+
+                    if(s2 != null && (s2 = s2.trim()).length() > 0)
+                    {
+                        if(this.startsWith(s2, "-") == false)
+                        {
+                            name = s1;
+                            value = s2;
+                            map[name] = value;
+                            i = j;
+                        }
+                        else
+                        {
+                            name = this.parseName(s1);
+                            value = this.parseValue(s1);
+                            map[name] = value;
+                        }
+                    }
+                }
+                else
+                {
+                    name = this.parseName(s1);
+                    value = this.parseValue(s1);
+                    map[name] = value;
+                }
+            }
+            else
+            {
+                j = args[i].indexOf(":");
+
+                if(j < 0)
+                {
+                    j = args[i].indexOf("=");
+                }
+
+                if(j > -1)
+                {
+                    name = args[i].substring(0, j);
+                    value = args[i].substring(j + 1);
+                    map[name] = value;
+                }
+            }
+        }
+    }
+
+    return map;
+};
+
+
+/**
+ * @param name
+ * @return String
+ */
+Options.prototype.parseName = function(name){
+    var i = name.indexOf(":");
+
+    if(i < 0)
+    {
+        i = name.indexOf("=");
+    }
+
+    if(i > -1)
+    {
+        return name.substring(0, i);
+    }
+
+    return name;
+};
+
+/**
+ * @param name
+ * @return String
+ */
+Options.prototype.parseValue = function(name){
+    var i = name.indexOf(":");
+
+    if(i < 0)
+    {
+        i = name.indexOf("=");
+    }
+
+    if(i > -1)
+    {
+        return name.substring(i + 1);
+    }
+
+    return "true";
+};
+
+Options.prototype.getValue = function(name){
+    return this.options[name];
+};
+
+/**
+ * @param name
+ * @return
+ */
+Options.prototype.getOption = function(name){
+    return this.getValue(name);
+};
+
+/**
+ * @param name
+ * @return
+ */
+Options.prototype.getRequired = function(name){
+    var value = this.getValue(name);
+
+    if(value == null)
+    {
+        throw new Error("the parameter named '" + name + "' must be not null !");
+    }
+
+    return value;
+};
+
+/**
+ * @param name
+ * @param value
+ * @return
+ */
+Options.prototype.setOption = function(name, value){
+    return (this.options[name] = value);
+};
+
+/**
+ * @param name
+ * @return
+ */
+Options.prototype.remove = function(name){
+    this.options[name] = null;
+};
+
+/**
+ * @return
+ */
+Options.prototype.getArguments = function(){
+    var buffer = [];
+
+    for(var name in this.options)
+    {
+        var value = this.options[name];
+        buffer.push("\"" + name + ":" + value + "\"");
+    }
+
+    return buffer.join(" ");
+};
+
+/**
+ * @return
+ */
+Options.prototype.getArgumentsArray = function(){
+    var i = 0;
+    var args = [];
+
+    for(var name in this.options)
+    {
+        var value = this.options[name];
+        args[i++] = (name + ":" + value);
+    }
+
+    return args;
+};
+
+/**
+ * @param args
+ */
+Options.test = function(){
+    var args = ["userName:test", "password:1234"];
+    var options = new Options(args);
+    console.log("userName: " + options.getOption("userName"));
+    console.log("password: " + options.getOption("password"));
+
+    options.setOption("driverClass", "test.TestDriver");
+    console.log(options.getArguments());
+    options.setOption("url", "jdbc:test:book");
+    console.log(options.getArguments());
+    options.remove("url");
+    console.log(options.getArguments());
+};
+
 if(typeof(module) != "undefined")
 {
     module.exports.WebServer = WebServer;
@@ -2395,6 +2616,7 @@ if(typeof(module) != "undefined")
     module.exports.JspServlet = JspServlet;
     module.exports.Cookie = Cookie;
     module.exports.Bootstrap = Bootstrap;
+    module.exports.Options = Options;
 }
 
 /**

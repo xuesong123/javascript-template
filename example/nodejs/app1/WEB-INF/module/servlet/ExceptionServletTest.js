@@ -1,5 +1,5 @@
 var ExceptionServlet = function(request, response, servletChain){
-    throw {"name": "RuntimeException", "message": "Test Exception !"}
+    throw new Error("RuntimeException: Test Exception !");
 };
 
 if(typeof(module) != "undefined")

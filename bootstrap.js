@@ -1,11 +1,18 @@
-var fs = require("fs");
 var path = require("path");
 var http = require("http");
 var july = require("./webserver.js");
 
-function startServer()
+function startServer(args)
 {
-    var webServer = july.Bootstrap.create("localhost|127\\.0\\.0\\.1", ".");
+    var options = new july.Options(args);
+    var home = options.getOption("-home");
+
+    if(home == null)
+    {
+        home = ".";
+    }
+
+    var webServer = july.Bootstrap.create("localhost|127\\.0\\.0\\.1", home);
     webServer.start();
 
     var server = http.createServer(function(request, response){
@@ -32,4 +39,5 @@ function startServer()
     server.listen(80, "localhost");
     console.log("[Server]: " + process.pid + " - Server start on port: 80");
 };
-startServer();
+
+startServer(process.argv.slice(2));
