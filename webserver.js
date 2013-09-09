@@ -582,7 +582,7 @@ WebApplication.prototype.getResponse = function(request, response){
             this._end.apply(this, arguments);
         }
 
-        this._end = function(){};
+        this.end = function(){};
     };
 
     return response;
