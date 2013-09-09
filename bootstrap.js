@@ -16,6 +16,7 @@ function startServer(args)
     webServer.start();
 
     var server = http.createServer(function(request, response){
+        LogUtil.info(request.client.remoteAddress + " " + request.url);
         webServer.dispatch(request, response);
     });
 
@@ -39,7 +40,7 @@ function startServer(args)
     });
 
     server.listen(80, "localhost");
-    console.log("[Server]: " + process.pid + " - Server start on port: 80");
+    LogUtil.info("[Server]: Server start on port: 80");
 };
 
 startServer(process.argv.slice(2));

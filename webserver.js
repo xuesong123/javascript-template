@@ -173,6 +173,7 @@ var LogUtil = {};
 LogUtil.info = function(){
     var args = [];
     args.push(DateUtil.toString(new Date()));
+    args.push(process.pid);
     args.push("-");
 
     for(var i = 0; i < arguments.length; i++)
