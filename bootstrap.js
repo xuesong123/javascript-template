@@ -1,7 +1,7 @@
 var fs = require("fs");
 var path = require("path");
 var http = require("http");
-var july = require("../../webserver.js");
+var july = require("./webserver.js");
 
 function startServer()
 {
@@ -13,15 +13,6 @@ function startServer()
         {
             response.writeHead(404, "Not Found", {"Content-Type": "text/plain"});
             response.end();
-            return;
-        }
-
-        if(request.url == "/exit.do")
-        {
-            response.writeHead(200, "OK", {"Content-Type": "text/html"});
-            response.write("<h1>Server stoped !</h1>");
-            response.end();
-            quit();
             return;
         }
 

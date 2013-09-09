@@ -1077,7 +1077,7 @@ ServletContext.prototype.load = function(force){
         var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
 
         LogUtil.info([
-            "\r\n",
+            "",
             "********************************************",
             "*                                          *",
             "*           ServletContext.load            *",
@@ -1154,7 +1154,7 @@ ServletContext.prototype.destroy = function(){
         this.status = 3;
         var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
         LogUtil.info([
-            "\r\n",
+            "",
             "********************************************",
             "*                                          *",
             "*          ServletContext.destroy          *",
