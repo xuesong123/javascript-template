@@ -972,6 +972,11 @@ ServletContext.prototype.getWebConfig = function(create){
         this.webConfig = {};
     }
 
+    if(this.webConfig.status == null)
+    {
+        this.webConfig.status = 1;
+    }
+
     if(this.webConfig.servletChain == null)
     {
         this.webConfig.servletChain = [];
@@ -1047,7 +1052,7 @@ ServletContext.prototype.getServlets = function(lib, map){
     return map;
 };
 
-ServletContext.prototype.load = function(){
+ServletContext.prototype.load = function(force){
     if(this.status != 0)
     {
         this.destroy();
@@ -1058,8 +1063,21 @@ ServletContext.prototype.load = function(){
         this.index++;
         this.status = 1;
 
+        var map = {};
+        var webConfig = this.getWebConfig(true);
+        var packages = webConfig.packages;
+        var servletChain = webConfig.servletChain;
+
+        if(webConfig.status == 0 && force != true)
+        {
+            this.status = 0;
+            return;
+        }
+
         var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
+
         LogUtil.info([
+            "\r\n",
             "********************************************",
             "*                                          *",
             "*           ServletContext.load            *",
@@ -1067,11 +1085,6 @@ ServletContext.prototype.load = function(){
             "********************************************",
             "[ServletContext]: " + this.index + " Load ServletContext: " + lib
         ].join("\r\n"));
-
-        var map = {};
-        var webConfig = this.getWebConfig(true);
-        var packages = webConfig.packages;
-        var servletChain = webConfig.servletChain;
 
         if(packages != null)
         {
@@ -1141,6 +1154,7 @@ ServletContext.prototype.destroy = function(){
         this.status = 3;
         var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
         LogUtil.info([
+            "\r\n",
             "********************************************",
             "*                                          *",
             "*          ServletContext.destroy          *",
@@ -1151,9 +1165,6 @@ ServletContext.prototype.destroy = function(){
 
         this.unwatch();
 
-        /**
-         * destroy servlet
-         */
         for(var name in this.context)
         {
             var servlet = this.context[name].servlet;
@@ -1178,9 +1189,6 @@ ServletContext.prototype.destroy = function(){
             }
         }
 
-        /**
-         * delete require cache
-         */
         FileIterator.each(lib, function(file){
             var stats = fs.statSync(file);
 
@@ -1257,7 +1265,7 @@ ServletContext.prototype.unwatch = function(){
  */
 ServletContext.prototype.reload = function(){
     this.destroy();
-    this.load();
+    this.load(true);
 };
 
 ServletContext.prototype.start = function(){
@@ -1265,7 +1273,7 @@ ServletContext.prototype.start = function(){
 };
 
 ServletContext.prototype.restart = function(){
-    this.reload();
+    this.reload(true);
 };
 
 ServletContext.prototype.shutdown = function(){
@@ -2368,50 +2376,13 @@ Bootstrap.create = function(host, home){
         if(stats.isDirectory())
         {
             var app = WebApplicationFactory.create(host, path.join(root, dir), "/" + dir);
+            var servletContext = app.getServletContext();
             vistualHost.add(app);
         }
     }
 
     webServer.add(vistualHost);
     return webServer;
-};
-
-var Cluster = function(){
-    this.clusters = [];
-};
-
-Cluster.prototype.start = function(count, handler){
-    var cluster = require("cluster");
-    var cpus = require("os").cpus().length;
-
-    if(cluster.isMaster)
-    {
-        if(count < 1)
-        {
-            count = cpus;
-        }
-
-        // Fork workers.
-        for(var i = 0; i < count; i++)
-        {
-            this.clusters.push(cluster.fork());
-        }
-
-        cluster.on("exit", function(worker, code, signal){
-            LogUtil.info("worker " + worker.process.pid + " died!");
-        });
-    }
-    else
-    {
-        handler();
-    }
-};
-
-Cluster.prototype.shutdown = function(){
-    for(var i = 0; i < this.clusters.length; i++)
-    {
-        this.clusters[i].process.exit(0);
-    }
 };
 
 if(typeof(module) != "undefined")
@@ -2424,7 +2395,6 @@ if(typeof(module) != "undefined")
     module.exports.JspServlet = JspServlet;
     module.exports.Cookie = Cookie;
     module.exports.Bootstrap = Bootstrap;
-    module.exports.Cluster = Cluster;
 }
 
 /**

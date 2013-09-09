@@ -28,14 +28,7 @@ function startServer()
         webServer.dispatch(request, response);
     });
 
-    var status = 1;
-
     var quit = function(){
-        if(status == 0)
-        {
-            return;
-        }
-
         console.log("[Server]: " + process.pid + " - Server stopping...");
         webServer.shutdown();
         console.log("[Server]: " + process.pid + " - Server stopping...");
@@ -44,7 +37,6 @@ function startServer()
             console.log("[Server]: " + process.pid + " - Server stoped!");
         });
 
-        status = 0;
         process.exit(0);
     };
 

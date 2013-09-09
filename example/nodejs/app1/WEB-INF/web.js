@@ -1,5 +1,7 @@
 var servletConfig = {"servletChain": []};
 
+servletConfig.status = 1;
+
 servletConfig.set = function(pattern, servlet){
     this.servletChain.push({"pattern": pattern, "servlet": servlet});
 };
