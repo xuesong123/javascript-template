@@ -1682,7 +1682,7 @@ var com = (function(){
                 "c:comment":         com.skin.ayada.jstl.core.CommentTag,
                 "c:param":           com.skin.ayada.jstl.core.ParameterTag,
                 "c:action":          com.skin.ayada.taglib.ActionTag,
-                // "f:substring":       com.skin.ayada.jstl.fmt.SubstringTag,
+                "f:substring":       com.skin.ayada.jstl.fmt.SubstringTag,
                 "fmt:formatDate":    com.skin.ayada.jstl.fmt.DateFormatTag
         };
     };
@@ -4500,6 +4500,155 @@ var com = (function(){
     if(typeof(com.skin.ayada.jstl.fmt) == "undefined"){
         com.skin.ayada.jstl.fmt = {};
     }
+
+    /*
+     * $RCSfile: SubstringTag.js,v $$
+     * $Revision: 1.1 $
+     * $Date: 2012-10-18 $
+     *
+     * Copyright (C) 2008 Skin, Inc. All rights reserved.
+     * This software is the proprietary information of Skin, Inc.
+     * Use is subject to license terms.
+     */
+    var SubstringTag = com.skin.ayada.jstl.fmt.SubstringTag = com.skin.framework.Class.create(com.skin.ayada.tagext.BodyTagSupport, function(){
+        this.length = 0;
+        this.value = null;
+        this.padding = null;
+    });
+
+    SubstringTag.prototype.doStartTag = function(){
+        if(this.value != null)
+        {
+            try
+            {
+                var result = this.substring(this.value, this.length, this.padding);
+                this.pageContext.getOut().write(result);
+            }
+            catch(e)
+            {
+            }
+
+            return com.skin.ayada.tagext.Tag.SKIP_BODY;
+        }
+        else
+        {
+            return com.skin.ayada.tagext.Tag.EVAL_PAGE;
+        }
+    };
+
+    SubstringTag.prototype.doEndTag = function(){
+        try
+        {
+            var bodyContent = this.getBodyContent();
+            var result = this.substring(bodyContent.getString(), this.length, this.padding);
+            this.pageContext.getOut().write(result);
+        }
+        catch(e)
+        {
+        }
+
+        return com.skin.ayada.tagext.Tag.EVAL_PAGE;
+    };
+
+    /**
+     * @param source
+     * @param length
+     * @param padding
+     * @return String
+     */
+    SubstringTag.prototype.substring = function(source, length, padding){
+        var s = source.replace(/(^\s*)|(\s*$)/g, "");
+
+        if(source.length < 1)
+        {
+            return s;
+        }
+
+        var c;
+        var size = 0;
+        var count = s.length;
+        var buffer = [];
+
+        for(var i = 0; i < s.length; i++)
+        {
+            c = s.charCodeAt(i);
+
+            if(c >= 0x0080)
+            {
+                size += 2;
+                count++;
+            }
+            else
+            {
+                size++;
+            }
+
+            if(size > length)
+            {
+                if(c >= 0x4e00)
+                {
+                    size -= 2;
+                }
+                else
+                {
+                    size--;
+                }
+
+                break;
+            }
+
+            buffer[buffer.length] = s.charAt(i);
+        }
+
+        if(size < count && padding != null)
+        {
+            buffer[buffer.length] = padding;
+        }
+
+        return buffer.join("");
+    };
+
+    /**
+     * @param length the length to set
+     */
+    SubstringTag.prototype.setLength = function(length){
+        this.length = length;
+    };
+
+    /**
+     * @return the length
+     */
+    SubstringTag.prototype.getLength = function(){
+        return this.length;
+    };
+
+    /**
+     * @param value the value to set
+     */
+    SubstringTag.prototype.setValue = function(value){
+        this.value = value;
+    };
+
+    /**
+     * @return the value
+     */
+    SubstringTag.prototype.getValue = function(){
+        return this.value;
+    };
+
+    /**
+     * @param padding the padding to set
+     */
+    SubstringTag.prototype.setPadding = function(padding){
+        this.padding = padding;
+    };
+
+    /**
+     * @return the padding
+     */
+    SubstringTag.prototype.getPadding = function(){
+        return this.padding;
+    };
 
     /*
      * $RCSfile: DateFormatTag,v $$
