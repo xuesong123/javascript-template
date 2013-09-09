@@ -120,7 +120,7 @@ AppAdminAction.prototype.test = function(arg1, arg2, arg3){
     this.response.end();
 };
 
-AppAdminAction.annotation = mapping;
+AppAdminAction.mapping = mapping;
 
 if(typeof(module) != "undefined")
 {

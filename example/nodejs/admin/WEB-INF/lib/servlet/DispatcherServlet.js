@@ -29,15 +29,15 @@ DispatcherServlet.prototype.init = function(servletContext){
 
                     if(action != null && typeof(action) == "function")
                     {
-                        var annotation = action.annotation;
+                        var mapping = action.mapping;
 
-                        if(annotation != null)
+                        if(mapping != null)
                         {
                             var config = null;
 
-                            for(var name in annotation)
+                            for(var name in mapping)
                             {
-                                config = annotation[name];
+                                config = mapping[name];
                                 chain.push({"pattern": config.pattern, "action": action, "method": name});
                             }
                         }
