@@ -71,14 +71,6 @@ function startServer()
     webServer.start();
 
     var server = http.createServer(function(request, response){
-        if(request.url == "/favicon.ico")
-        {
-            response.writeHead(404, "Not Found", {"Content-Type": "text/html"});
-            response.write("<h1>" + process.pid + " - " + request.url + "Not Found !</h1>");
-            response.end();
-            return;
-        }
-
         if(request.url == "/exit.do")
         {
             response.writeHead(200, "OK", {"Content-Type": "text/html"});

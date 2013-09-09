@@ -4,13 +4,6 @@ var webApplication = july.WebApplicationFactory.create("localhost", "app1", "/")
 webApplication.start();
 
 var server = http.createServer(function(request, response){
-    if(request.url == "/favicon.ico")
-    {
-        response.writeHead(404, "Not Found", {"Content-Type": "text/plain"});
-        response.end();
-        return;
-    }
-
     webApplication.dispatch(request, response);
 });
 
