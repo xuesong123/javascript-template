@@ -21,12 +21,12 @@ function startServer(args)
     });
 
     var quit = function(){
-        console.log("[Server]: " + process.pid + " - Server stopping...");
+        LogUtil.info("[Server]: " + process.pid + " - Server stopping...");
         webServer.shutdown();
-        console.log("[Server]: " + process.pid + " - Server stopping...");
+        LogUtil.info("[Server]: " + process.pid + " - Server stopping...");
 
         server.close(function(){
-            console.log("[Server]: " + process.pid + " - Server stoped!");
+            LogUtil.info("[Server]: Server stoped!");
         });
     };
 
@@ -35,7 +35,7 @@ function startServer(args)
     });
 
     process.on("uncaughtException", function(error){
-        console.log("Caught exception: " + error);
+        LogUtil.info("Caught exception: " + error);
         console.trace();
     });
 
