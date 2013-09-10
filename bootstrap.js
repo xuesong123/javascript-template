@@ -1,10 +1,10 @@
 var path = require("path");
 var http = require("http");
-var july = require("./webserver.js");
+var ayada = require("webserver");
 
 function startServer(args)
 {
-    var options = new july.Options(args);
+    var options = new ayada.Options(args);
     var home = options.getOption("-home");
 
     if(home == null)
@@ -12,7 +12,7 @@ function startServer(args)
         home = ".";
     }
 
-    var webServer = july.Bootstrap.create("localhost|127\\.0\\.0\\.1", home);
+    var webServer = ayada.Bootstrap.create("localhost|127\\.0\\.0\\.1", home);
     webServer.start();
 
     var server = http.createServer(function(request, response){

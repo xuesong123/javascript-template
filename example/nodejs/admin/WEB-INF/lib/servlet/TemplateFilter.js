@@ -1,18 +1,9 @@
 var os = require("os");
 var fs = require("fs");
 var path = require("path");
-var ayada = require("./../ayada/ayada-1.0.0.min.js");
-var scrollPageTaglib = require("./../taglib/scrollpage.taglib.js");
-var helloTaglib = require("./../taglib/hellotag.taglib.js");
+var ayada = require("ayada");
 var util = require("./../util/util.js");
 var StringUtil = util.StringUtil;
-
-/**
- * setup app taglib
- */
-ayada.TagLibraryFactory.setup("app:scrollpage", scrollPageTaglib.ScrollPageTag);
-ayada.TagLibraryFactory.setup("app:cache", scrollPageTaglib.CacheTag);
-ayada.TagLibraryFactory.setup("app:hello", helloTaglib.HelloTag);
 
 /**
  * $RCSfile: TemplateDispatcher.js,v $$
