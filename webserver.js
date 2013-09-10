@@ -1269,7 +1269,6 @@ ServletContext.prototype.unwatch = function(){
  * reload all servlet
  */
 ServletContext.prototype.reload = function(){
-    this.destroy();
     this.load(true);
 };
 
@@ -2488,7 +2487,6 @@ Options.prototype.parse = function(args, map){
     return map;
 };
 
-
 /**
  * @param name
  * @return String
@@ -2529,13 +2527,17 @@ Options.prototype.parseValue = function(name){
     return "true";
 };
 
+/**
+ * @param name
+ * @return String
+ */
 Options.prototype.getValue = function(name){
     return this.options[name];
 };
 
 /**
  * @param name
- * @return
+ * @return String
  */
 Options.prototype.getOption = function(name){
     return this.getValue(name);
@@ -2543,7 +2545,7 @@ Options.prototype.getOption = function(name){
 
 /**
  * @param name
- * @return
+ * @return String
  */
 Options.prototype.getRequired = function(name){
     var value = this.getValue(name);
@@ -2559,7 +2561,7 @@ Options.prototype.getRequired = function(name){
 /**
  * @param name
  * @param value
- * @return
+ * @return String
  */
 Options.prototype.setOption = function(name, value){
     return (this.options[name] = value);
@@ -2567,14 +2569,14 @@ Options.prototype.setOption = function(name, value){
 
 /**
  * @param name
- * @return
+ * @return String
  */
 Options.prototype.remove = function(name){
     this.options[name] = null;
 };
 
 /**
- * @return
+ * @return String
  */
 Options.prototype.getArguments = function(){
     var buffer = [];
@@ -2589,7 +2591,7 @@ Options.prototype.getArguments = function(){
 };
 
 /**
- * @return
+ * @return Array
  */
 Options.prototype.getArgumentsArray = function(){
     var i = 0;
@@ -2604,23 +2606,6 @@ Options.prototype.getArgumentsArray = function(){
     return args;
 };
 
-/**
- * @param args
- */
-Options.test = function(){
-    var args = ["userName:test", "password:1234"];
-    var options = new Options(args);
-    console.log("userName: " + options.getOption("userName"));
-    console.log("password: " + options.getOption("password"));
-
-    options.setOption("driverClass", "test.TestDriver");
-    console.log(options.getArguments());
-    options.setOption("url", "jdbc:test:book");
-    console.log(options.getArguments());
-    options.remove("url");
-    console.log(options.getArguments());
-};
-
 if(typeof(module) != "undefined")
 {
     module.exports.WebServer = WebServer;
@@ -2633,12 +2618,3 @@ if(typeof(module) != "undefined")
     module.exports.Bootstrap = Bootstrap;
     module.exports.Options = Options;
 }
-
-/**
- * Servlet/JSP running
- * 1. WebApplication.dispatch -> getServletChain
- * returns servletChain, jspServlet, defaultServlet
- * servletChain: contains all serlvet
- * jspServlet: .jsp support
- * defaultServlet: static resource support
- */
