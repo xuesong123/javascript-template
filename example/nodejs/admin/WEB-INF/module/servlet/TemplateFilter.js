@@ -1,6 +1,6 @@
 var ayada = require("ayada");
 var filter = require("./../../lib/servlet/TemplateFilter");
-var taglib = require("./../taglib/taglib.js");
+var taglib = require("./../taglib/taglib2.js");
 
 /**
  * setup app taglib
