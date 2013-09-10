@@ -1225,7 +1225,15 @@ ServletContext.prototype.getFileWatchDog = function(){
         var webjs = this.getRealPath("/WEB-INF/web.js");
 
         var handler = function(work, list){
-            list.push(webjs);
+            if(fs.existsSync(webjs) == true)
+            {
+                var stats = fs.statSync(webjs);
+
+                if(stats.isFile())
+                {
+                    list.push({"file": webjs, "lastModified": stats.mtime.getTime()});
+                }
+            }
 
             FileIterator.each(work, function(file){
                 var stats = fs.statSync(file);
@@ -1253,8 +1261,15 @@ ServletContext.prototype.getFileWatchDog = function(){
 };
 
 ServletContext.prototype.watch = function(){
-    this.getFileWatchDog().watch();
-    this.watchStatus = 1;
+    var fileWatchDog = this.getFileWatchDog();
+
+    if(fileWatchDog.interval > 0)
+    {
+        fileWatchDog.watch();
+        this.watchStatus = 1;
+    }
+
+    return fileWatchDog.interval;
 };
 
 ServletContext.prototype.unwatch = function(){
@@ -1376,9 +1391,6 @@ FileWatchDog.prototype.watch = function(){
     {
         clearTimeout(this.timer);
     }
-
-    var list = this.list;
-
     if(this.list.length < 1)
     {
         this.handler(this.home, this.list);
@@ -1388,6 +1400,7 @@ FileWatchDog.prototype.watch = function(){
         var f1 = null;
         var f2 = null;
         var temp = [];
+        var list = this.list;
 
         LogUtil.info("[WATCH-DOG]: watch - " + this.home);
         this.handler(this.home, temp);
