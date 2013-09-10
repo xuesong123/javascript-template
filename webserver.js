@@ -1252,11 +1252,11 @@ ServletContext.prototype.getFileWatchDog = function(){
             instance.reload();
         };
 
-        var webConfig = this.getWebConfig();
         this.fileWatchDog = new FileWatchDog(this.getRealPath("/WEB-INF/module"), handler, listener);
-        this.fileWatchDog.interval = webConfig.watchConfig.interval * 1000;
     }
 
+    var webConfig = this.getWebConfig();
+    this.fileWatchDog.interval = webConfig.watchConfig.interval * 1000;
     return this.fileWatchDog;
 };
 
