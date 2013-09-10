@@ -1064,6 +1064,14 @@ ServletContext.prototype.load = function(force){
         this.destroy();
     }
 
+    console.log([
+        "********************************************",
+        "*                                          *",
+        "*           ServletContext Load            *",
+        "*                                          *",
+        "********************************************"
+    ].join("\r\n"));
+
     try
     {
         var map = {};
@@ -1079,15 +1087,6 @@ ServletContext.prototype.load = function(force){
 
         this.status = 1;
         var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
-
-        console.log([
-            "********************************************",
-            "*                                          *",
-            "*           ServletContext Load            *",
-            "*                                          *",
-            "********************************************"
-        ].join("\r\n"));
-
         LogUtil.info("[ServletContext]: Load ServletContext: " + lib);
         LogUtil.info("[ServletContext]: http://" + this.host + ":80" + this.path);
 
@@ -1154,20 +1153,19 @@ ServletContext.prototype.load = function(force){
  * destroy all servlet
  */
 ServletContext.prototype.destroy = function(){
+    console.log([
+        "********************************************",
+        "*                                          *",
+        "*          ServletContext Destroy          *",
+        "*                                          *",
+        "********************************************"
+    ].join("\r\n"));
+
     try
     {
         this.status = 3;
         var lib = path.join(this.getRealPath("/"), "WEB-INF/module");
-        console.log([
-            "********************************************",
-            "*                                          *",
-            "*          ServletContext Destroy          *",
-            "*                                          *",
-            "********************************************"
-        ].join("\r\n"));
-
         LogUtil.info("[ServletContext]: Destroy ServletContext: " + lib);
-
         this.unwatch();
 
         for(var name in this.context)
