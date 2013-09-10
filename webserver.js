@@ -2372,6 +2372,8 @@ Bootstrap.create = function(host, home){
     var vistualHost = new VistualHost(host);
     var root = fs.realpathSync(home);
 
+    webServer.add(vistualHost);
+
     if(fs.existsSync(root) == false)
     {
         return webServer;
@@ -2379,27 +2381,24 @@ Bootstrap.create = function(host, home){
 
     var stats = fs.statSync(root);
 
-    if(stats.isFile())
+    if(stats.isDirectory())
     {
-        return webServer;
-    }
+        var list = fs.readdirSync(root);
 
-    var list = fs.readdirSync(root);
-
-    for(var i = 0, length = list.length; i < length; i++)
-    {
-        var dir = list[i];
-        var stats = fs.statSync(path.join(root, dir));
-
-        if(stats.isDirectory())
+        for(var i = 0, length = list.length; i < length; i++)
         {
-            var app = WebApplicationFactory.create(host, path.join(root, dir), "/" + dir);
-            var servletContext = app.getServletContext();
-            vistualHost.add(app);
+            var dir = list[i];
+            var stats = fs.statSync(path.join(root, dir));
+
+            if(stats.isDirectory())
+            {
+                var app = WebApplicationFactory.create(host, path.join(root, dir), "/" + dir);
+                var servletContext = app.getServletContext();
+                vistualHost.add(app);
+            }
         }
     }
 
-    webServer.add(vistualHost);
     return webServer;
 };
 
