@@ -7,7 +7,7 @@
 @ECHO ================================================================================
 @ECHO.
 
-@TITLE Bootstrap
+@TITLE Management Console
 @SET WEBAPP_HOME=./example/nodejs
 
 @ECHO WEBAPP_HOME: %WEBAPP_HOME%
