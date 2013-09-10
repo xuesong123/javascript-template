@@ -1688,19 +1688,11 @@ HttpServletResponseWrapper.getSessionContext = function(){
 HttpServletResponseWrapper.getWriter = function(){
     if(this.writer == null)
     {
-        this.writer = new JspWriter();
-        this.writer.response = this;
-
-        this.writer.write = function(source){
-            if(source != null && source != undefined)
-            {
-                this.response.write(source);
-            }
-            else
-            {
-                this.response.write("null");
-            }
-        };
+        /**
+         * must be exits 'write' method
+         * writer.write = function(){}
+         */
+        this.writer = this;
     }
 
     return this.writer;
@@ -1770,7 +1762,7 @@ HttpServletResponseWrapper.redirect = function(path){
 };
 
 /**
- * $RCSfile: Cookie.js,v $$
+ * $RCSfile: JspWriter.js,v $$
  * $Revision: 1.1 $
  * $Date: 2012-10-18 $
  *
@@ -1778,32 +1770,47 @@ HttpServletResponseWrapper.redirect = function(path){
  * This software is the proprietary information of Skin, Inc.
  * Use is subject to license terms.
  */
-var JspWriter = function(){
+var JspWriter = function(out){
+    this.out = out;
+    this.length = 0;
     this.buffer = [];
 };
 
+JspWriter.prototype.setOut = function(out){
+    this.out = out;
+};
+
+JspWriter.prototype.getOut = function(){
+    return this.out;
+};
+
 /**
- * @param source
+ * @param content
  */
-JspWriter.prototype.write = function(source){
-    if(source != null && source != undefined){
-        this.buffer.push(source);
-    }
-    else
+JspWriter.prototype.write = function(content){
+    if(content == null)
     {
-        this.buffer.push("null");
+        content = "null";
+    }
+
+    this.buffer[this.buffer.length] = content;
+    this.length = this.length + content.length;
+
+    if((this.length + content.length) > 4096)
+    {
+        this.flush();
     }
 };
 
 /**
  * @param source
  */
-JspWriter.prototype.print = function(source){this.write(source);};
+JspWriter.prototype.print = function(content){this.write(content);};
 
 /**
  * @param source
  */
-JspWriter.prototype.println = function(source){this.write(source); this.write("\r\n");};
+JspWriter.prototype.println = function(content){this.write(content); this.write("\r\n");};
 
 /**
  * wrap a new JspWriter
@@ -1821,16 +1828,25 @@ JspWriter.prototype.popBody = function(){
     return null;
 };
 
-/**
- * @param source
- */
 JspWriter.prototype.flush = function(){
+    this.out.write(this.buffer.join(""));
+
+    if(this.out.flush != null)
+    {
+        this.out.flush();
+    }
+
+    this.buffer.length = 0;
+    this.length = 0;
 };
 
-/**
- * close current stream
- */
 JspWriter.prototype.close = function(){
+    this.flush();
+
+    if(this.out.close != null)
+    {
+        this.out.close();
+    }
 };
 
 /**

@@ -1294,6 +1294,8 @@ var com = (function(){
      */
     var JspWriter = com.skin.ayada.runtime.JspWriter = com.skin.framework.Class.create(null, function(out){
         this.out = out;
+        this.length = 0;
+        this.buffer = [];
     });
 
     JspWriter.prototype.setOut = function(out){
@@ -1305,7 +1307,18 @@ var com = (function(){
     };
 
     JspWriter.prototype.write = function(content){
-        this.out.write(content);
+        if(content == null)
+        {
+            content = "null";
+        }
+
+        this.buffer[this.buffer.length] = content;
+        this.length = this.length + content.length;
+
+        if((this.length + content.length) > 4096)
+        {
+            this.flush();
+        }
     };
 
     JspWriter.prototype.print = function(content){
@@ -1318,9 +1331,24 @@ var com = (function(){
     };
 
     JspWriter.prototype.flush = function(){
+        this.out.write(this.buffer.join(""));
+
+        if(this.out.flush != null)
+        {
+            this.out.flush();
+        }
+
+        this.buffer.length = 0;
+        this.length = 0;
     };
 
     JspWriter.prototype.close = function(){
+        this.flush();
+
+        if(this.out.close != null)
+        {
+            this.out.close();
+        }
     };
 
     /*
