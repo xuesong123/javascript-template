@@ -1,0 +1,320 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>test</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Cache-Control" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<script type="text/javascript">
+var Ajax = {};
+
+Ajax.getXmlHttpRequest = function(){
+    var xmlHttpRequest = null;
+
+    if(window.ActiveXObject != null)
+    {
+        xmlHttpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    else
+    {
+        xmlHttpRequest = new XMLHttpRequest();
+    }
+
+    return xmlHttpRequest;
+};
+
+Ajax.request = function(request){
+    var xmlHttpRequest = ((request.transport != null && request.transport != undefined) ? request.transport : this.getXmlHttpRequest());
+
+    if(xmlHttpRequest != null && xmlHttpRequest != undefined)
+    {
+        var method = request.method;
+        var encoding = request.charset;
+
+        xmlHttpRequest.open(method, request.url, (request.async != null ? request.async : true));
+
+        if(method != null && method.toLowerCase() == "post" && encoding != null)
+        {
+            xmlHttpRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=" + encoding);
+        }
+        else
+        {
+            xmlHttpRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        }
+
+        xmlHttpRequest.onreadystatechange = function()
+        {
+            if(xmlHttpRequest.readyState == 4)
+            {
+                if(request.callback != null)
+                {
+                    request.callback(xmlHttpRequest);
+                }
+                else
+                {
+                    if(xmlHttpRequest.status == 0 || xmlHttpRequest.status == 200)
+                    {
+                        if(request.success != null)
+                        {
+                            request.success(xmlHttpRequest);
+                        }
+                    }
+                    else if(xmlHttpRequest.status == 404 || xmlHttpRequest.status == 500)
+                    {
+                        if(request.error != null)
+                        {
+                            request.error(xmlHttpRequest);
+                        }
+                    }
+                    else
+                    {
+                        if(request.error != null)
+                        {
+                            request.error(xmlHttpRequest);
+                        }
+                    }
+                }
+            }
+        };
+
+        var parameters = Ajax.serialize(request.data);
+        xmlHttpRequest.setRequestHeader("Accept", "text/javascript, text/html, application/xml, text/xml, */*");
+        xmlHttpRequest.send(parameters);
+    }
+    else
+    {
+        if(request.error != null)
+        {
+            request.error(xmlHttpRequest);
+        }
+    }
+};
+
+Ajax.serialize = function(json){
+    var a = [];
+    if(json != null)
+    {
+        if(typeof(json) == "object")
+        {
+            for(var name in json)
+            {
+                var value = json[name];
+                var className = typeof(value);
+
+                if(value != null)
+                {
+                    if(className == "object" && value.length != null)
+                    {
+                        for(var j = 0; j < value.length; j++)
+                        {
+                            if(value[j] != null)
+                            {
+                                a[a.length] = encodeURIComponent(name) + "=" + encodeURIComponent(value[j]);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        a[a.length] = encodeURIComponent(name) + "=" + encodeURIComponent(value.toString());
+                    }
+                }
+            }
+        }
+    }
+
+    return a.join("&");
+};
+
+function sendCommand(command)
+{
+    Ajax.request({
+        "method": "get",
+        "url": "/" + command,
+        "success": function(response){}
+    });
+};
+
+window.onload = function(){
+    document.onkeydown = function(e){
+        var event = (e || window.event);
+        var key = event.keyCode;
+
+        switch(key)
+        {
+            case 37: // <
+            case 65: // A
+            {
+                sendCommand("left");
+                break;
+            }
+            case 39: // >
+            case 68: // D
+            {
+                sendCommand("right");
+                break;
+            }
+            case 38: // ^
+            case 87: // W
+            case 70: // F
+            {
+                sendCommand("change");
+                break;
+            }
+            case 40: // v
+            case 83: // S
+            {
+                sendCommand("down");
+                break;
+            }
+            case 32: // -
+            {
+                sendCommand("downx", 18);
+                break;
+            }
+            case 85: // U
+            {
+                sendCommand("up");
+                break;
+            }
+            case 49: // 1
+            case 50: // 2
+            case 51: // 3
+            case 52: // 4
+            case 53: // 5
+            case 54: // 6
+            case 55: // 7
+            {
+                // test(key - 49);
+                break;
+            }
+            case 80: // P
+            {
+                sendCommand("pool");
+                break;
+            }
+            case 113: // F2
+            {
+                sendCommand("start");
+                break;
+            }
+            case 13: // 13
+            {
+                sendCommand("pause");
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
+    };
+
+    var surt = new Surt();
+    surt.create();
+    surt.init();
+};
+
+var Surt = function(){
+    this.start = 0;
+    this.chain = [];
+};
+
+Surt.prototype.bind = function(target, method){
+    return function(){
+        method.apply(target, arguments);
+    };
+};
+
+Surt.prototype.getHandler = function(){
+    if(this.handler == null)
+    {
+        this.handler = this.bind(this, function(event){
+            var e = (event || window.event);
+            var t = (e.srcElement || e.target);
+            var n = parseInt(t.getAttribute("num"));
+            t.style.backgroundColor = "#c0c0c0";
+            this.click(n);
+        });
+    }
+
+    return this.handler;
+};
+
+Surt.prototype.create = function(){
+    var table = document.getElementById("mytable");
+
+    for(var i = 0; i < 5; i++)
+    {
+        var tr = table.insertRow(-1);
+
+        for(var j = 0; j < 5; j++)
+        {
+            var cell = tr.insertCell(-1);
+            cell.style.width = "20px";
+            cell.style.height = "20px";
+            cell.style.cursor = "default";
+            cell.innerHTML = "&nbsp;";
+            cell.onclick = this.getHandler();
+        }
+    }
+};
+
+Surt.prototype.init = function(){
+    var table = document.getElementById("mytable");
+    var nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
+
+    for(var i = 0; i < 5; i++)
+    {
+        for(var j = 0; j < 5; j++)
+        {
+            var n = 0;
+            var c = table.rows[i].cells[j];
+
+            while(n == 0)
+            {
+                n = nums[Math.floor(Math.random() * 25)];
+            }
+
+            nums[n - 1] = 0;
+            c.innerHTML = n;
+            c.setAttribute("num", n);
+            c.style.backgroundColor = "#ffffff";
+        }
+    }
+
+    for(var i = 0; i < 25; i++)
+    {
+        this.chain[i] = 0;
+    }
+};
+
+Surt.prototype.click = function(n){
+    if(n == 1)
+    {
+        this.start = new Date().getTime();
+        this.chain[n - 1] = n;
+    }
+    else if(n == 25)
+    {
+        this.chain[n - 1] = n;
+        alert("over: " + (new Date().getTime() - this.start));
+    }
+    else
+    {
+        if(this.chain[n - 2] == 0)
+        {
+            this.init();
+        }
+        else
+        {
+            this.chain[n - 1] = n;
+        }
+    }
+};
+</script>
+</head>
+<body>
+<table id="mytable" border="1"></table>
+</body>
+</html>
