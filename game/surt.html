@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>test</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Cache-Control" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<script type="text/javascript">
+<!--
+window.onload = function(){
+    var surt = new Surt();
+    surt.create();
+    surt.init();
+};
+
+var Surt = function(){
+    this.start = 0;
+    this.chain = [];
+};
+
+Surt.prototype.bind = function(target, method){
+    return function(){
+        method.apply(target, arguments);
+    };
+};
+
+Surt.prototype.getHandler = function(){
+    if(this.handler == null)
+    {
+        this.handler = this.bind(this, function(event){
+            var e = (event || window.event);
+            var t = (e.srcElement || e.target);
+            var n = parseInt(t.getAttribute("num"));
+            t.style.backgroundColor = "#c0c0c0";
+            this.click(n);
+        });
+    }
+
+    return this.handler;
+};
+
+Surt.prototype.create = function(){
+    var table = document.getElementById("mytable");
+
+    for(var i = 0; i < 5; i++)
+    {
+        var tr = table.insertRow(-1);
+
+        for(var j = 0; j < 5; j++)
+        {
+            var cell = tr.insertCell(-1);
+            cell.style.width = "20px";
+            cell.style.height = "20px";
+            cell.style.cursor = "default";
+            cell.innerHTML = "&nbsp;";
+            cell.onclick = this.getHandler();
+        }
+    }
+};
+
+Surt.prototype.init = function(){
+    var table = document.getElementById("mytable");
+    var nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
+
+    for(var i = 0; i < 5; i++)
+    {
+        for(var j = 0; j < 5; j++)
+        {
+            var n = 0;
+            var c = table.rows[i].cells[j];
+
+            while(n == 0)
+            {
+                n = nums[Math.floor(Math.random() * 25)];
+            }
+
+            nums[n - 1] = 0;
+            c.innerHTML = n;
+            c.setAttribute("num", n);
+            c.style.backgroundColor = "#ffffff";
+        }
+    }
+
+    for(var i = 0; i < 25; i++)
+    {
+        this.chain[i] = 0;
+    }
+};
+
+Surt.prototype.click = function(n){
+    if(n == 1)
+    {
+        this.start = new Date().getTime();
+        this.chain[n - 1] = n;
+    }
+    else if(n == 25)
+    {
+        this.chain[n - 1] = n;
+        alert("over: " + (new Date().getTime() - this.start));
+    }
+    else
+    {
+        if(this.chain[n - 2] == 0)
+        {
+            this.init();
+        }
+        else
+        {
+            this.chain[n - 1] = n;
+        }
+    }
+};
+//-->
+</script>
+</head>
+<body>
+<table id="mytable" border="1"></table>
+</body>
+</html>

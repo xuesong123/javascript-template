@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Cache-Control" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<title>Console</title>
+<link rel="stylesheet" type="text/css" href="resource/css/els.css"/>
+<script type="text/javascript" src="resource/js/els.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+window.onload = function()
+{
+    var e = new E();
+
+    document.getElementById("Container").innerHTML = e.create("PoolTable", 18, 12);
+    document.getElementById("NextBlockPool").innerHTML = e.create("NextTable", 4, 4);
+    document.onkeydown = (function(target, method){
+        return function(e){
+            method.apply(target, [(e || window.event), 0]);
+        };
+    })(e, e.event);
+};
+//]]>
+</script>
+</head>
+<body>
+<div>
+    <div style="width: 254px; float: left;">
+        <div id="Container"></div>
+    </div>
+    <div style="width: 112px; float: left;">
+        <div id="CtrlPanel" style="width: 112px; height: 378px; border: 1px solid #a46015; background-color: #f2b05c;">
+            <div class="label"><span>Speed: </span><span id="speed">0</span></div>
+            <div class="label"><span>Score: </span><span id="score">0</span></div>
+            <div class="space"></div>
+            <div class="space"></div>
+            <div class="label"><span>Next: </span></div>
+            <div class="space"></div>
+            <div id="NextBlockPool" style="padding: 4px;"></div>
+            <div class="space"></div>
+            <div class="label center"><span id="good">Game Over</span></div>
+            <div class="space"></div>
+            <div><img style="width: 65px; border: none;" src="resource/images/snopy.gif"></div>
+            <div class="copyright">Copyright(c) Mr.C</div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
