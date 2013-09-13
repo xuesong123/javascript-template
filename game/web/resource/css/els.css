@@ -26,7 +26,41 @@ table.blocks tr td{
 
 table.blocks tr td.block{
     color: #0099cc;
+    background: url(../images/block.gif) no-repeat;
 }
+
+table.blocks tr td.b0{
+    background-color: #f2b05c;
+}
+
+table.blocks tr td.b1{
+    background-position: -20px 0px;
+}
+
+table.blocks tr td.b2{
+    background-position: -40px 0px;
+}
+
+table.blocks tr td.b3{
+    background-position: -60px 0px;
+}
+
+table.blocks tr td.b4{
+    background-position: -80px 0px;
+}
+
+table.blocks tr td.b5{
+    background-position: -100px 0px;
+}
+
+table.blocks tr td.b6{
+    background-position: -120px 0px;
+}
+
+table.blocks tr td.b7{
+    background-position: -140px 0px;
+}
+
 
 div.space{
     height: 20px; border: 0px solid #ff0000; font-size: 0px;

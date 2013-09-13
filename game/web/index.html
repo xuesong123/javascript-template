@@ -10,9 +10,43 @@
 <script type="text/javascript" src="resource/js/els.js"></script>
 <script type="text/javascript">
 //<![CDATA[
+
+/**
+ * @Override
+ */
+E.prototype.copy = function(i, j){
+    var table = document.getElementById("PoolTable");
+
+    for(var k = 0; k < 12; k++)
+    {
+        table.rows[j].cells[k].innerHTML = table.rows[i].cells[k].innerHTML;
+        table.rows[j].cells[k].className = table.rows[i].cells[k].className;
+    }
+};
+
+/**
+ * @Override
+ */
+E.prototype.setVisible = function(i, j, color){
+    var table = document.getElementById("PoolTable");
+    table.rows[i].cells[j].innerHTML = (color != this.bgcolor ? this.texts[i].charAt(j) : "0");
+    table.rows[i].cells[j].className = "block " + color;
+};
+
+/**
+ * @Override
+ */
+E.prototype.setNextVisible = function(i, j, c, t){
+    var table = document.getElementById("NextTable");
+    table.rows[i].cells[j].className = "block " + c;
+    table.rows[i].cells[j].innerHTML = t;
+};
+
 window.onload = function()
 {
     var e = new E();
+    e.colors = ["b1", "b2", "b3", "b4", "b5", "b6", "b7"];
+    e.bgcolor = "b0";
 
     document.getElementById("Container").innerHTML = e.create("PoolTable", 18, 12);
     document.getElementById("NextBlockPool").innerHTML = e.create("NextTable", 4, 4);
