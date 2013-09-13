@@ -206,7 +206,6 @@ E.prototype.right = function(){
             this.draw(b, x - 1, y, 0);
             this.draw(b, x + 0, y, 1);
             this.x = x;
-
             return true;
         }
     }
@@ -228,7 +227,6 @@ E.prototype.change = function(){
             this.draw(b, x, y, 0);
             this.draw(c, x, y, 1);
             this.t = (t + 1) % (this.d[this.n].length);
-
             return true;
         }
     }
@@ -248,7 +246,6 @@ E.prototype.up = function(){
             this.draw(b, x, y + 1, 0);
             this.draw(b, x, y + 0, 1);
             this.y = y;
-
             return true;
         }
     }
@@ -762,7 +759,7 @@ E.prototype.event = function(e){
             this.start();
             break;
         }
-        case 13: // 13
+        case 13: // Enter
         {
             this.pause();
             break;
