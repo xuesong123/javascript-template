@@ -29,7 +29,7 @@ Cursor.prototype.setPosition = function (x, y){
 };
 
 var cursor = new Cursor(process.stdout);
-var E = require("./book_donate.js").E;
+var E = require("./els.js").E;
 
 E.prototype.baseX = 23;
 E.prototype.baseY = 1;
@@ -48,7 +48,7 @@ E.prototype.create = function(score){
         "#            #                  #",
         "#            #                  #",
         "#            #                  #",
-        "#            #                  #",
+        "#            # Next             #",
         "#            # 1111             #",
         "#            # 1111             #",
         "#            # 1111             #",
