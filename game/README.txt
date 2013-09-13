@@ -9,5 +9,6 @@ Usage:
        left: A or LEFT
       right: D or RIGHT
        down: S or DOWN
-         up: W or UP
+     change: W or UP
+         up: U
 down bottom: Space
