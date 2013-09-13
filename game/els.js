@@ -27,27 +27,6 @@ var E = function(){
         // [0x9f00, 0xc88c, 0xf900, 0xc44c]
     ];
 
-    this.texts = [
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            "
-    ];
-
     this.colors = ["#008000", "#4d0099", "#000093", "#777722", "#b500b5", "#800064"];
     this.colors = ["#008000", "#4d0099", "#000093", "#777722", "#b500b5", "#800064"];
     this.colors = ["#999999", "#0000ff", "#80ffff", "#80ff80", "#ffff00", "#ff8000", "#ff00ff", "#ff0000"];
@@ -59,6 +38,27 @@ var E = function(){
     this.delay  = 50;
     this.state  = 0;
 };
+
+E.prototype.texts = [
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+];
 
 E.prototype.create = function(id, rows, cells){
     var a = [];
@@ -532,7 +532,7 @@ E.prototype.animate = function(count, line, callback){
     {
         if(callback != null)
         {
-            callback();
+            callback.apply(this);
         }
     }
 };

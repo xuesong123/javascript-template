@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Cache-Control" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<title>test</title>
+<style type="text/css">
+span.block{float: left; margin: 1px 0px 0px 1px; padding: 0px; width: 20px; height: 20px; color: #6d2c06;}
+span.b0{background-color: #ffffff;}
+span.b1{background-color: #efefef;}
+span.b2{background-color: #efefef;}
+span.b3{background-color: #efefef;}
+span.b4{background-color: #efefef;}
+span.b5{background-color: #efefef;}
+span.b6{background-color: #efefef;}
+span.b7{background-color: #efefef;}
+</style>
+<script type="text/javascript" src="resource/js/els.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+E.prototype.setScore = function(score){
+};
+
+E.prototype.setSpeed = function(speed){
+};
+
+E.prototype.info = function(text){
+};
+
+E.prototype.copy = function(i, j){
+    for(var k = 0; k < 12; k++)
+    {
+        var e1 = document.getElementById("b" + i + "_" + k);
+        var e2 = document.getElementById("b" + j + "_" + k);
+
+        if(e1 != null && e2 != null)
+        {
+            e2.innerHTML = e1.innerHTML;
+            e2.style.color = e1.style.color;
+        }
+    }
+};
+
+E.prototype.setVisible = function(i, j, color){
+    var element = document.getElementById("b" + i + "_" + j);
+
+    if(element != null)
+    {
+        if(color != this.bgcolor)
+        {
+            element.className = "block " + color;
+        }
+        else
+        {
+            element.className = "block " + this.bgcolor;
+        }
+    }
+};
+
+E.prototype.setNextVisible = function(i, j, color){
+};
+
+E.prototype.create = function(id, rows, cells){
+    var b = [];
+
+    for(var i = 0; i < rows; i++)
+    {
+        b[b.length] = "<div style=\"clear: both;\">";
+        for(var j = 0; j < cells; j++)
+        {
+            b[b.length] = "<span id=\"b" + i + "_" + j + "\" class=\"block\"></span>";
+        }
+        b[b.length] = "</div>";
+    }
+    return b.join("");
+};
+
+var e = new E();
+
+window.onload = function()
+{
+    var e = new E();
+    e.colors = ["b1", "b2", "b3", "b4", "b5", "b6", "b7"];
+    e.bgcolor = "b0";
+    document.getElementById("elscontainer").innerHTML = e.create("PoolTable", 18, 12);
+    document.onkeydown = (function(target, method){
+        return function(e){
+            method.apply(target, [(e || window.event), 0]);
+        };
+    })(e, e.event);
+};
+//]]>
+</script>
+</head>
+<body>
+<div id="elscontainer"></div>
+</body>
+</html>

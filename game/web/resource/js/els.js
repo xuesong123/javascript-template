@@ -27,27 +27,6 @@ var E = function(){
         // [0x9f00, 0xc88c, 0xf900, 0xc44c]
     ];
 
-    this.texts = [
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            ",
-        "            "
-    ];
-
     this.colors = ["#008000", "#4d0099", "#000093", "#777722", "#b500b5", "#800064"];
     this.colors = ["#008000", "#4d0099", "#000093", "#777722", "#b500b5", "#800064"];
     this.colors = ["#999999", "#0000ff", "#80ffff", "#80ff80", "#ffff00", "#ff8000", "#ff00ff", "#ff0000"];
@@ -59,6 +38,27 @@ var E = function(){
     this.delay  = 50;
     this.state  = 0;
 };
+
+E.prototype.texts = [
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+];
 
 E.prototype.create = function(id, rows, cells){
     var a = [];
@@ -206,7 +206,6 @@ E.prototype.right = function(){
             this.draw(b, x - 1, y, 0);
             this.draw(b, x + 0, y, 1);
             this.x = x;
-
             return true;
         }
     }
@@ -228,7 +227,6 @@ E.prototype.change = function(){
             this.draw(b, x, y, 0);
             this.draw(c, x, y, 1);
             this.t = (t + 1) % (this.d[this.n].length);
-
             return true;
         }
     }
@@ -248,7 +246,6 @@ E.prototype.up = function(){
             this.draw(b, x, y + 1, 0);
             this.draw(b, x, y + 0, 1);
             this.y = y;
-
             return true;
         }
     }
@@ -535,7 +532,7 @@ E.prototype.animate = function(count, line, callback){
     {
         if(callback != null)
         {
-            callback();
+            callback.apply(this);
         }
     }
 };
@@ -762,7 +759,7 @@ E.prototype.event = function(e){
             this.start();
             break;
         }
-        case 13: // 13
+        case 13: // Enter
         {
             this.pause();
             break;
