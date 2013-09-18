@@ -591,7 +591,7 @@ E.prototype.next = function(){
 
     var x = 4;
     var y = 0;
-    var b = this.d[this._n][this._t]
+    var b = this.d[this._n][this._t];
     this.info("Hurry up");
 
     for(var i = 0; i < 4; i++)
