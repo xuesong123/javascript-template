@@ -64,6 +64,15 @@ var com = (function(){
      */
     var Class = com.skin.framework.Class = {};
 
+    Class.getClassId = function(){
+        if(this.id == null)
+        {
+            this.id = 0;
+        }
+
+        return (this.id = this.id + 1);
+    };
+
     /**
      * create a class
      * function Animal(){
@@ -95,30 +104,35 @@ var com = (function(){
         {
             if(constructor != null)
             {
-                clazz = function(){/* Class.create */ parent.apply(this, arguments); clazz.$super = parent.prototype; constructor.apply(this, arguments);};
+                clazz = function(){/* Class.create */ parent.apply(this, arguments); constructor.apply(this, arguments);};
             }
             else
             {
-                clazz = function(){/* Class.create */ parent.apply(this, arguments); clazz.$super = parent.prototype;};
+                clazz = function(){/* Class.create */ parent.apply(this, arguments);};
             }
 
             for(var property in parent.prototype)
             {
                 clazz.prototype[property] = parent.prototype[property];
             }
+
+            clazz.$super = parent.prototype;
         }
         else
         {
             if(constructor != null)
             {
-                clazz = function(){/* Class.create */ clazz.$super = {}; constructor.apply(this, arguments);};
+                clazz = function(){/* Class.create */ constructor.apply(this, arguments);};
             }
             else
             {
-                clazz = function(){/* Class.create */ clazz.$super = {};};
+                clazz = function(){/* Class.create */};
             }
+
+            clazz.$super = {};
         }
 
+        clazz.classId = "class_" + this.getClassId();
         return (clazz.prototype.constructor = clazz);
     };
 

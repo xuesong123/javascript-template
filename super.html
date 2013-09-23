@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>test</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Cache-Control" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<link rel="stylesheet" type="text/css" href="console/css/console.css"/>
+<script type="text/javascript">
+//<![CDATA[
+/*
+ * $RCSfile: Class.js,v $$
+ * $Revision: 1.1 $
+ * $Date: 2012-10-18 $
+ *
+ * Copyright (C) 2008 Skin, Inc. All rights reserved.
+ * This software is the proprietary information of Skin, Inc.
+ * Use is subject to license terms.
+ */
+var Class = {};
+
+Class.getClassId = function(){
+    if(this.id == null)
+    {
+        this.id = 0;
+    }
+
+    return (this.id = this.id + 1);
+};
+
+Class.create = function(parent, constructor){
+    var clazz = null;
+
+    if(parent != null)
+    {
+        if(constructor != null)
+        {
+            clazz = function(){/* Class.create */ parent.apply(this, arguments); constructor.apply(this, arguments);};
+        }
+        else
+        {
+            clazz = function(){/* Class.create */ parent.apply(this, arguments);};
+        }
+
+        for(var property in parent.prototype)
+        {
+            clazz.prototype[property] = parent.prototype[property];
+        }
+
+        clazz.$super = parent.prototype;
+    }
+    else
+    {
+        if(constructor != null)
+        {
+            clazz = function(){/* Class.create */ constructor.apply(this, arguments);};
+        }
+        else
+        {
+            clazz = function(){/* Class.create */};
+        }
+
+        clazz.$super = {};
+    }
+
+    clazz.classId = "class_" + this.getClassId();
+    return (clazz.prototype.constructor = clazz);
+};
+
+/**
+ * @param instance
+ * @param prototype
+ * @retur Object
+ */
+Class.$super = /* private */ function(instance, prototype){
+    var object = {};
+
+    for(var i in prototype)
+    {
+        if(typeof(prototype[i]) == "function")
+        {
+            object[i] = function(){prototype[i].apply(instance, arguments);};
+        }
+    }
+
+    return object;
+};
+
+/**
+ * simple singleton
+ * var myduck = Class.getInstance(Animal, function(){this.swim = function(){};});
+ * myduck.swim();
+ * @param parent
+ * @param constructor
+ * @return Object
+ */
+Class.getInstance = function(parent, constructor){
+    return new (Class.create(parent, constructor))();
+};
+
+/**
+ * extend properties
+ * @param child
+ * @param parent
+ * @return Object
+ */
+Class.extend = function(child, parent){
+    if(child == null)
+    {
+        child = {};
+    }
+
+    for(var property in parent)
+    {
+        child[property] = parent[property];
+    }
+
+    return child;
+};
+
+var mylogcount = 0;
+
+var mylog = function(content){
+    if(mylogcount++ >= 10)
+    {
+        throw new Error(mylogcount);
+    }
+
+    alert(content);
+};
+
+var ClassA = Class.create();
+
+ClassA.prototype.hello = function(){
+    mylog("ClassA.hello");
+};
+
+var ClassB = Class.create(ClassA);
+var ClassC = Class.create(ClassB);
+
+ClassB.prototype.hello = function(){
+    mylog("ClassB.hello");
+    ClassB.$super.hello();
+};
+
+ClassC.prototype.hello = function(){
+    mylog("ClassC.hello");
+    ClassC.$super.hello();
+};
+
+window.onload = function(){
+    var a = new ClassA();
+    var b = new ClassB();
+    var c = new ClassC();
+
+    // b.hello();
+    c.hello();
+};
+//]]>
+</script>
+</head>
+<body>
+
+</body>
+</html>
