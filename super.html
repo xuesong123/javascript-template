@@ -9,6 +9,35 @@
 <link rel="stylesheet" type="text/css" href="console/css/console.css"/>
 <script type="text/javascript">
 //<![CDATA[
+var Package = {};
+
+Package.create = function(name, parent){
+    var a = name.split(".");
+
+    if(a.length < 1)
+    {
+        return {};
+    }
+
+    var n = null;
+    var p = (parent || {});
+    var object = p;
+
+    for(var i = 0; i < a.length; i++)
+    {
+        n = a[i];
+
+        if(p[n] == null || p[n] == undefined)
+        {
+            p[n] = {"packageName": n};
+        }
+
+        p = p[n];
+    }
+
+    return object[a[0]];
+};
+
 /*
  * $RCSfile: Class.js,v $$
  * $Revision: 1.1 $
@@ -26,7 +55,8 @@ Class.getClassId = function(){
         this.id = 0;
     }
 
-    return (this.id = this.id + 1);
+    this.id++;
+    return "class_" + this.id;
 };
 
 Class.create = function(parent, constructor){
@@ -64,7 +94,8 @@ Class.create = function(parent, constructor){
         clazz.$super = {};
     }
 
-    clazz.classId = "class_" + this.getClassId();
+    clazz.parent = parent;
+    clazz.classId = this.getClassId();
     return (clazz.prototype.constructor = clazz);
 };
 
@@ -88,9 +119,6 @@ Class.$super = /* private */ function(instance, prototype){
 };
 
 /**
- * simple singleton
- * var myduck = Class.getInstance(Animal, function(){this.swim = function(){};});
- * myduck.swim();
  * @param parent
  * @param constructor
  * @return Object
@@ -100,7 +128,6 @@ Class.getInstance = function(parent, constructor){
 };
 
 /**
- * extend properties
  * @param child
  * @param parent
  * @return Object
@@ -154,8 +181,8 @@ window.onload = function(){
     var b = new ClassB();
     var c = new ClassC();
 
-    // b.hello();
-    c.hello();
+    // c.hello();
+    alert(ClassC);
 };
 //]]>
 </script>

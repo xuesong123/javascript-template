@@ -32,9 +32,10 @@ var com = (function(){
      * var com = Package.create("com.test1.test1"); // will return {"test1": {"test1": {}}};
      * logger.debug(com.test1.test1.packageName);
      * @param name
+     * @param parent
      * @return Object
      */
-    Package.create = function(name){
+    Package.create = function(name, parent){
         var a = name.split(".");
 
         if(a.length < 1)
@@ -42,15 +43,23 @@ var com = (function(){
             return {};
         }
 
-        var p = {};
+        var n = null;
+        var p = (parent || {});
         var object = p;
 
-        for(var i = 1; i < a.length; i++)
+        for(var i = 0; i < a.length; i++)
         {
-            p = p[a[i]] = {"packageName": a[i]};
+            n = a[i];
+
+            if(p[n] == null || p[n] == undefined)
+            {
+                p[n] = {"packageName": n};
+            }
+
+            p = p[n];
         }
 
-        return object;
+        return object[a[0]];
     };
 
     /*
@@ -70,7 +79,8 @@ var com = (function(){
             this.id = 0;
         }
 
-        return (this.id = this.id + 1);
+        this.id++;
+        return "class_" + this.id;
     };
 
     /**
@@ -132,7 +142,8 @@ var com = (function(){
             clazz.$super = {};
         }
 
-        clazz.classId = "class_" + this.getClassId();
+        clazz.parent = parent;
+        clazz.classId = this.getClassId();
         return (clazz.prototype.constructor = clazz);
     };
 
