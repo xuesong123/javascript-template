@@ -53,9 +53,10 @@ var com = (function(){
 
             if(p[n] == null || p[n] == undefined)
             {
-                p[n] = {"packageName": n};
+                p[n] = {};
             }
 
+            p[n].packageName = n;
             p = p[n];
         }
 
@@ -202,10 +203,6 @@ var com = (function(){
         com.skin.log = {};
     }
 
-    if(typeof(com.skin.log.logger) == "undefined"){
-        com.skin.log.logger = {};
-    }
-
     var Logger = com.skin.log.Logger = function(className){
         this.level = 5;
         this.className = className;
@@ -216,6 +213,7 @@ var com = (function(){
 
     Logger.prototype.write = function(content){
         /* WScript.echo(content); */
+        /* console.log(content); */
     };
 
     Logger.prototype.log = function(){
@@ -1162,7 +1160,7 @@ var com = (function(){
      * This software is the proprietary information of Skin, Inc.
      * Use is subject to license terms.
      */
-    var Expression = com.skin.ayada.statement.Expression = com.skin.framework.Class.create(com.skin.ayada.statement.DataNode, function(){
+    var Expression = com.skin.ayada.statement.Expression = com.skin.framework.Class.create(DataNode, function(){
         this.nodeName = NodeType.EXPR_NAME;
         this.nodeType = NodeType.EXPRESSION;
     });
@@ -1200,7 +1198,7 @@ var com = (function(){
      * This software is the proprietary information of Skin, Inc.
      * Use is subject to license terms.
      */
-    var TextNode = com.skin.ayada.statement.TextNode = com.skin.framework.Class.create(com.skin.ayada.statement.DataNode, function(){
+    var TextNode = com.skin.ayada.statement.TextNode = com.skin.framework.Class.create(DataNode, function(){
         this.nodeName = NodeType.TEXT_NAME;
         this.nodeType = NodeType.TEXT;
     });
@@ -1226,6 +1224,71 @@ var com = (function(){
      */
     TextNode.prototype.toString = function(){
         return this.buffer.join("");
+    };
+
+    /*
+     * $RCSfile: TextNode.js,v $$
+     * $Revision: 1.1 $
+     * $Date: 2012-7-3 $
+     *
+     * Copyright (C) 2008 Skin, Inc. All rights reserved.
+     *
+     * This software is the proprietary information of Skin, Inc.
+     * Use is subject to license terms.
+     */
+    var NodeUtil = com.skin.ayada.statement.NodeUtil = com.skin.framework.Class.getInstance();
+
+    NodeUtil.toString = function(node){
+        var buffer = [];
+
+        if(node.getNodeType() == NodeType.TEXT)
+        {
+            buffer.push(node.toString());
+            return buffer.join("");
+        }
+
+        if(node.getNodeType() == NodeType.COMMENT)
+        {
+            buffer.push(node.toString());
+            return buffer.join("");
+        }
+
+        if(node.getNodeType() == NodeType.EXPRESSION)
+        {
+            buffer.push("${");
+            buffer.push(node.toString());
+            buffer.push("}");
+            return buffer.join("");
+        }
+
+        buffer.push("<");
+        buffer.push(node.getNodeName());
+        var attributes = node.getAttributes();
+
+        if(attributes != null)
+        {
+            for(var i in attributes)
+            {
+                buffer.push(" ");
+                buffer.push(i);
+                buffer.push("=\"");
+                buffer.push(attributes[i]);
+                buffer.push("\"");
+            }
+        }
+
+        if(node.getClosed() == NodeType.PAIR_CLOSED)
+        {
+            buffer.push(">...");
+            buffer.push("</");
+            buffer.push(node.getNodeName());
+            buffer.push(">");
+        }
+        else
+        {
+            buffer.push("/>");
+        }
+        return buffer.join("");
     };
 
     /*
@@ -1786,19 +1849,22 @@ var com = (function(){
     TagUtil.setAttributes = function(tag, attributes, expressionContext){
         if(attributes != null)
         {
+            var value = null;
             var setter = null;
 
             for(var name in attributes)
             {
+                value = TagUtil.evaluate(expressionContext, attributes[name]);
                 setter = tag["set" + name.charAt().toUpperCase() + name.substring(1)];
+
                 if(setter != null)
                 {
-                    var value = TagUtil.evaluate(expressionContext, attributes[name]);
                     setter.apply(tag, [value]);
                 }
                 else
                 {
-                    tag[name] = attributes[name];
+                    /* name != [JAVASCRIPT_KEYWORD] */
+                    tag[name] = value;
                 }
             }
         }
@@ -2255,7 +2321,8 @@ var com = (function(){
 
         if(stack.peek() != null)
         {
-            throw new Error(this.toString("Exception at ", stack.peek()) + " not match !");
+            var node = stack.peek();
+            throw new Error("Exception at line #" + node.getLineNumber() + " " + com.skin.ayada.statement.NodeUtil.toString(node) + " not match !");
         }
 
         var template = new com.skin.ayada.template.Template(list);
@@ -2340,7 +2407,6 @@ var com = (function(){
             if(nodeName == "t:import")
             {
                 var node = new Node(nodeName);
-                node.setLineNumber(this.getLineNumber());
                 var attributes = this.getAttributes();
                 node.setOffset(list.length);
                 node.setLength(2);
@@ -2379,7 +2445,6 @@ var com = (function(){
             if(tagClassName != null)
             {
                 var node = new Node(nodeName);
-                node.setLineNumber(this.getLineNumber());
                 var attributes = this.getAttributes();
                 node.setOffset(list.length);
                 node.setLineNumber(this.lineNumber);
@@ -2477,7 +2542,7 @@ var com = (function(){
         }
         else
         {
-            throw new Error(toString("Exception at line", node) + " not match !");
+            throw new Error("Exception at line #" + node.getLineNumber() + " " + com.skin.ayada.statement.NodeUtil.toString(node) + " not match !");
         }
     };
 
@@ -2607,69 +2672,6 @@ var com = (function(){
             library[name] = className;
             tagLibrary.setup(library);
         }
-    };
-
-    /**
-     * @param prefix
-     * @param node
-     * @return String
-     */
-    TemplateCompiler.prototype.toString = function(prefix, node){
-        var buffer = [];
-        buffer.push(prefix);
-        buffer.push("line #");
-        buffer.push(node.getLineNumber());
-        buffer.push(" ");
-
-        if(node.getNodeType() == NodeType.TEXT)
-        {
-            buffer.push(node.toString());
-            return buffer.join("");
-        }
-
-        if(node.getNodeType() == NodeType.COMMENT)
-        {
-            buffer.push(node.toString());
-            return buffer.join("");
-        }
-
-        if(node.getNodeType() == NodeType.EXPRESSION)
-        {
-            buffer.push("${");
-            buffer.push(node.toString());
-            buffer.push("}");
-            return buffer.join("");
-        }
-
-        buffer.push("<");
-        buffer.push(node.getNodeName());
-        var attributes = node.getAttributes();
-
-        if(attributes != null)
-        {
-            for(var i in attributes)
-            {
-                buffer.push(" ");
-                buffer.push(i);
-                buffer.push("=\"");
-                buffer.push(attributes[i]);
-                buffer.push("\"");
-            }
-        }
-
-        if(node.getClosed() == NodeType.PAIR_CLOSED)
-        {
-            buffer.push(">...");
-            buffer.push("</");
-            buffer.push(node.getNodeName());
-            buffer.push(">");
-        }
-        else
-        {
-            buffer.push("/>");
-        }
-
-        return buffer.join("");
     };
 
     /**
@@ -2840,6 +2842,7 @@ var com = (function(){
         var jspWriter = pageContext.getOut();
         var statements = this.getStatements(list);
         var expressionContext = pageContext.getExpressionContext();
+        var NodeUtil = com.skin.ayada.statement.NodeUtil;
         var NodeType = com.skin.ayada.statement.NodeType;
 
         var flag = 0;
@@ -2879,7 +2882,7 @@ var com = (function(){
 
             if(node.getLength() == 0)
             {
-                throw new Error(this.toString("Exception at ", node));
+                throw new Error("Exception at line #" + node.getLineNumber() + " " + NodeUtil.toString(node));
             }
 
             if(node.getOffset() == index)
@@ -3051,73 +3054,6 @@ var com = (function(){
         }
 
         return statements;
-    };
-
-    /**
-     * @param prefix
-     * @param node
-     * @return String
-     */
-    DefaultExecutor.toString = function(prefix, node){
-        var buffer = [];
-
-        if(prefix != null)
-        {
-            buffer.push(prefix);
-        }
-
-        buffer.push("line #");
-        buffer.push(node.getLineNumber());
-        buffer.push(" ");
-
-        if(node.getNodeType() == com.skin.ayada.statement.NodeType.TEXT)
-        {
-            buffer.push(node.toString());
-            return buffer.join("");
-        }
-
-        if(node.getNodeType() == com.skin.ayada.statement.NodeType.COMMENT)
-        {
-            buffer.push(node.toString());
-            return buffer.join("");
-        }
-
-        if(node.getNodeType() == com.skin.ayada.statement.NodeType.EXPRESSION)
-        {
-            buffer.push("${");
-            buffer.push(node.toString());
-            buffer.push("}");
-            return buffer.join("");
-        }
-
-        buffer.push("<");
-        buffer.push(node.getNodeName());
-        var attributes = node.getAttributes();
-
-        if(attributes != null)
-        {
-            for(var i in attributes)
-            {
-                buffer.push(" ");
-                buffer.push(i);
-                buffer.push("=\"");
-                buffer.push(attributes[i]);
-                buffer.push("\"");
-            }
-        }
-
-        if(node.getClosed() == com.skin.ayada.statement.NodeType.PAIR_CLOSED)
-        {
-            buffer.push(">...");
-            buffer.push("</");
-            buffer.push(node.getNodeName());
-            buffer.push(">");
-        }
-        else
-        {
-            buffer.push("/>");
-        }
-        return buffer.join("");
     };
 
     /*
@@ -4937,3 +4873,14 @@ if(typeof(module) != "undefined")
     module.exports.JspFactory = com.skin.ayada.runtime.JspFactory;
     module.exports.ActionDispatcher = com.skin.ayada.taglib.ActionDispatcher;
 }
+
+/**
+TODO: macro
+<c:macro name="sayHello">
+Hello, ${message} !
+</c:macro>
+
+<c:invoke name="sayHello">
+    <c:param name="message">Hello</c:param>
+</c:invoke>
+*/

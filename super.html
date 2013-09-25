@@ -29,9 +29,10 @@ Package.create = function(name, parent){
 
         if(p[n] == null || p[n] == undefined)
         {
-            p[n] = {"packageName": n};
+            p[n] = {};
         }
 
+        p[n].packageName = n;
         p = p[n];
     }
 
@@ -176,13 +177,27 @@ ClassC.prototype.hello = function(){
     ClassC.$super.hello();
 };
 
+var org = {test: {}, hello: function(){alert("hello");}};
+
 window.onload = function(){
     var a = new ClassA();
     var b = new ClassB();
     var c = new ClassC();
 
+    for(var i in window)
+    {
+        if(i == "org")
+        {
+            alert("org exists!");
+        }
+    }
+
     // c.hello();
-    alert(ClassC);
+    alert("window.org: " + window.org);
+
+    var root = Package.create("org.test", window);
+    alert(root.packageName);
+    root.hello();
 };
 //]]>
 </script>
