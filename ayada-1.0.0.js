@@ -1,11 +1,7 @@
-var com = (function(){
+(function(){
     if(typeof(com) == "undefined")
     {
         com = {};
-    }
-    else
-    {
-        return com;
     }
 
     if(typeof(com.skin) == "undefined"){
@@ -264,8 +260,6 @@ var com = (function(){
     LoggerFactory.getLogger = function(className){
         return new Logger(className);
     };
-
-    return com;
 })();
 
 (function(){
