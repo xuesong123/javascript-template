@@ -111,6 +111,18 @@ com.mytest.action.HelloAction = {
     }
 };
 
+com.mytest.action.HelloAction2 = function(){
+    this.randomValue = Math.random();
+};
+
+com.mytest.action.HelloAction2.prototype.execute = function(pageContext, parameters){
+    /**
+     * pageContext只能获取父页面的数据, 此处如果往PageContext里面放数据，只有父页面能够看到，当前绑定的页面看不到
+     * 通过返回值向当前绑定的页面传递数据
+     */
+    return {"actionMessage": this.randomValue + " - com.mytest.action.HelloAction - a: " + parameters["a"] + ", b: " + parameters["b"]};
+};
+
 window.onload = function(){
     logger.debug("console is ready !");
 
@@ -216,6 +228,16 @@ window.onload = function(){
 
 <h3>ActionTag test</h3>
 <c:action className="com.mytest.action.HelloAction" method="execute" page="actionPage1">
+    <c:param name="a" value="1"/>
+    <c:param name="b">2</c:param>
+</c:action>
+
+<c:action className="com.mytest.action.HelloAction2" method="execute" page="actionPage1">
+    <c:param name="a" value="1"/>
+    <c:param name="b">2</c:param>
+</c:action>
+
+<c:action className="com.mytest.action.HelloAction2" method="execute" page="actionPage1">
     <c:param name="a" value="1"/>
     <c:param name="b">2</c:param>
 </c:action>

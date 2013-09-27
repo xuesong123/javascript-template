@@ -79,6 +79,7 @@ Class.create = function(parent, constructor){
             clazz.prototype[property] = parent.prototype[property];
         }
 
+        clazz.prototype["toString"] = parent.prototype["toString"];
         clazz.$super = parent.prototype;
     }
     else
@@ -158,6 +159,7 @@ var mylog = function(content){
     alert(content);
 };
 
+/*
 var ClassA = Class.create();
 
 ClassA.prototype.hello = function(){
@@ -176,33 +178,37 @@ ClassC.prototype.hello = function(){
     mylog("ClassC.hello");
     ClassC.$super.hello();
 };
+*/
+var DataNode = Class.create(null, function(){
+    this.buffer = [];
+});
 
-var org = {test: {}, hello: function(){alert("hello");}};
+/**
+ * @param data
+ */
+DataNode.prototype.append = function(data){
+    this.buffer.push(data);
+};
+
+/**
+ * @return String
+ */
+DataNode.prototype.toString = function(){
+    return this.buffer.join("");
+};
+
+var Expression = Class.create(DataNode, function(){
+});
 
 window.onload = function(){
     var a = new ClassA();
     var b = new ClassB();
     var c = new ClassC();
-
-    for(var i in window)
-    {
-        if(i == "org")
-        {
-            alert("org exists!");
-        }
-    }
-
     // c.hello();
-    alert("window.org: " + window.org);
-
-    var root = Package.create("org.test", window);
-    alert(root.packageName);
-    root.hello();
 };
 //]]>
 </script>
 </head>
 <body>
-
 </body>
 </html>

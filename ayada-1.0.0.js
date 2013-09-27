@@ -123,6 +123,7 @@
                 clazz.prototype[property] = parent.prototype[property];
             }
 
+            clazz.prototype["toString"] = parent.prototype["toString"];
             clazz.$super = parent.prototype;
         }
         else
@@ -850,11 +851,13 @@
     var NodeType = com.skin.ayada.statement.NodeType = {};
 
     NodeType.DOCTYPE = "html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"";
-    NodeType.NODE    = 1;
-    NodeType.TEXT    = 2;
-    NodeType.COMMENT = 3;
-    NodeType.CDATA   = 4;
-    NodeType.EXPRESSION = 2013;
+    NodeType.NODE         = 1;
+    NodeType.TEXT         = 2;
+    NodeType.COMMENT      = 3;
+    NodeType.CDATA        = 4;
+    NodeType.EXPRESSION   = 2013;
+    NodeType.SCRIPTLET    = 2014;
+    NodeType.MACRO        = 2015;
 
     NodeType.DATA_NAME    = "#data";
     NodeType.TEXT_NAME    = "#text";
@@ -1175,13 +1178,6 @@
         return node;
     };
 
-    /**
-     * @return TextNode
-     */
-    Expression.prototype.toString = function(){
-        return this.buffer.join("");
-    };
-
     /*
      * $RCSfile: TextNode.js,v $$
      * $Revision: 1.1 $
@@ -1213,13 +1209,6 @@
         return node;
     };
 
-    /**
-     * @return TextNode
-     */
-    TextNode.prototype.toString = function(){
-        return this.buffer.join("");
-    };
-
     /*
      * $RCSfile: TextNode.js,v $$
      * $Revision: 1.1 $
@@ -1235,19 +1224,19 @@
     NodeUtil.toString = function(node){
         var buffer = [];
 
-        if(node.getNodeType() == NodeType.TEXT)
+        if(node.nodeType == NodeType.TEXT)
         {
             buffer.push(node.toString());
             return buffer.join("");
         }
 
-        if(node.getNodeType() == NodeType.COMMENT)
+        if(node.nodeType == NodeType.COMMENT)
         {
             buffer.push(node.toString());
             return buffer.join("");
         }
 
-        if(node.getNodeType() == NodeType.EXPRESSION)
+        if(node.nodeType == NodeType.EXPRESSION)
         {
             buffer.push("${");
             buffer.push(node.toString());
@@ -1924,7 +1913,7 @@
             {
                 var node = list[0];
 
-                if(node.getNodeType() == com.skin.ayada.statement.NodeType.EXPRESSION)
+                if(node.nodeType == com.skin.ayada.statement.NodeType.EXPRESSION)
                 {
                     return expressionContext.evaluate(node.toString());
                 }
@@ -1962,7 +1951,7 @@
                 {
                     node = list[i];
 
-                    if(node.getNodeType() == com.skin.ayada.statement.NodeType.EXPRESSION)
+                    if(node.nodeType == com.skin.ayada.statement.NodeType.EXPRESSION)
                     {
                         value = expressionContext.evaluate(node.toString());
 
@@ -2561,7 +2550,7 @@
         {
             var node = list[size - 1];
 
-            if(node.getNodeType() == NodeType.TEXT)
+            if(node.nodeType == NodeType.TEXT)
             {
                 textNode = node;
             }
@@ -2799,7 +2788,7 @@
         {
             var node = nodes[i];
 
-            if(node.getNodeType() == com.skin.ayada.statement.NodeType.EXPRESSION)
+            if(node.nodeType == com.skin.ayada.statement.NodeType.EXPRESSION)
             {
                 buffer[buffer.length] = "${" + node.toString(i) + "}";
             }
@@ -2855,14 +2844,14 @@
             statement = statements[index];
             node = statement.getNode();
 
-            if(node.getNodeType() == NodeType.TEXT)
+            if(node.nodeType == NodeType.TEXT)
             {
                 out.write(node.toString());
                 index++;
                 continue;
             }
 
-            if(node.getNodeType() == NodeType.EXPRESSION)
+            if(node.nodeType == NodeType.EXPRESSION)
             {
                 var value = node.eval(pageContext); // expressionContext.evaluate(node.toString());
 
