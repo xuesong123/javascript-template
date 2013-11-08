@@ -834,9 +834,73 @@
         com.skin.ayada = {};
     }
 
+    if(typeof(com.skin.ayada.config) == "undefined"){
+        com.skin.ayada.config = {};
+    }
+
     if(typeof(com.skin.ayada.statement) == "undefined"){
         com.skin.ayada.statement = {};
     }
+
+    /*
+     * $RCSfile: TemplateConfig.js,v $$
+     * $Revision: 1.1  $
+     * $Date: 2013-2-19  $
+     *
+     * Copyright (C) 2008 Skin, Inc. All rights reserved.
+     *
+     * This software is the proprietary information of Skin, Inc.
+     * Use is subject to license terms.
+     */
+    var TemplateConfig = com.skin.ayada.config.TemplateConfig = {"parameters": {}};
+
+    TemplateConfig.setValue = function(name, value){
+        this.parameters[name] = value;
+    };
+
+    TemplateConfig.getValue = function(name){
+        return this.parameters[name];
+    };
+
+    TemplateConfig.getString = function(name){
+        return this.parameters[name];
+    };
+
+    TemplateConfig.getBoolean = function(name){
+        var value = this.parameters[name];
+
+        if(value != null && value != 0 && value != "0" && value != "false")
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    };
+
+    TemplateConfig.contains = function(name, value){
+        var content = this.getString(name);
+
+        if(content != null)
+        {
+            var array = content.split(",");
+
+            for(var i = 0; i < array.length; i++)
+            {
+                if(array[i] == value)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    };
+
+    TemplateConfig.setValue("ayada.compile.source-factory", "com.skin.ayada.template.DefaultSourceFactory");
+    TemplateConfig.setValue("ayada.compile.source-pattern", "jsp,jspf,jspx,tpl");
+    TemplateConfig.setValue("ayada.compile.ignore-jsptag", "true");
 
     /*
      * $RCSfile: NodeType.js,v $$
@@ -1349,9 +1413,143 @@
 })();
 
 (function(){
+    if(typeof(com.skin.ayada.source) == "undefined"){
+        com.skin.ayada.source = {};
+    }
+
     if(typeof(com.skin.ayada.runtime) == "undefined"){
         com.skin.ayada.runtime = {};
     }
+
+    /*
+     * $RCSfile: Source.js,v $$
+     * $Revision: 1.1 $
+     * $Date: 2012-10-18 $
+     *
+     * Copyright (C) 2008 Skin, Inc. All rights reserved.
+     * This software is the proprietary information of Skin, Inc.
+     * Use is subject to license terms.
+     */
+    var Source = com.skin.ayada.source.Source = com.skin.framework.Class.create(null, function(home, source, type){
+        this.home = home;
+        this.source = source;
+        this.type = type;
+    });
+
+    /**
+     * @param home the home to set
+     */
+    Source.prototype.setHome = function(home){
+        this.home = home;
+    };
+
+    /**
+     * @return the home
+     */
+    Source.prototype.getHome = function(){
+        return this.home;
+    };
+
+    /**
+     * @param source the source to set
+     */
+    Source.prototype.setSource = function(source){
+        this.source = source;
+    };
+
+    /**
+     * @return the source
+     */
+    Source.prototype.getSource = function(){
+        return this.source;
+    };
+
+    /**
+     * @param type the type to set
+     */
+    Source.prototype.setType = function(type){
+        this.type = type;
+    };
+
+    /**
+     * @return the type
+     */
+    Source.prototype.getType = function(){
+        return this.type;
+    };
+
+    /*
+     * $RCSfile: SourceFactory.js,v $$
+     * $Revision: 1.1 $
+     * $Date: 2012-10-18 $
+     *
+     * Copyright (C) 2008 Skin, Inc. All rights reserved.
+     * This software is the proprietary information of Skin, Inc.
+     * Use is subject to license terms.
+     */
+    var SourceFactory = com.skin.ayada.source.SourceFactory = com.skin.framework.Class.create(null, function(){});
+
+    /**
+     * @param home
+     * @param path
+     * @param encoding
+     * @return Source
+     */
+    SourceFactory.prototype.getSource = function(path, encoding){
+        return null;
+    };
+
+    /**
+     * @param path
+     * @return int
+     */
+    SourceFactory.prototype.getSourceType = function(path){
+        var type = 1;
+        var fileType = this.getExtension(path).toLowerCase();
+        var config = com.skin.ayada.config.TemplateConfig;
+
+        if(config.contains("ayada.compile.source-pattern", fileType))
+        {
+            type = 0;
+        }
+
+        return type;
+    };
+
+    /**
+     * @param path
+     * @return String
+     */
+    SourceFactory.prototype.getExtension = function(path){
+        if(path != null && path.length > 0)
+        {
+            var c = "0";
+            var i = path.length - 1;
+
+            for(; i > -1; i--)
+            {
+                c = path.charAt(i);
+
+                if(c == '.')
+                {
+                    break;
+                }
+                else if(c == '/' || c == '\\' || c == ':')
+                {
+                    break;
+                }
+            }
+
+            if(c == '.')
+            {
+                return path.substring(i + 1);
+            }
+
+            return "";
+        }
+
+        return "";
+    };
 
     /*
      * $RCSfile: JspWriter.js,v $$
@@ -2203,6 +2401,7 @@
         this.lineNumber = 1;
         this.tagLibrary = null;
         this.logger = com.skin.log.LoggerFactory.getLogger("TemplateCompiler");
+        this.ignoreJspTag = com.skin.ayada.config.TemplateConfig.getBoolean("ayada.compile.ignore-jsptag");
     });
 
     /**
@@ -2323,8 +2522,9 @@
      */
     TemplateCompiler.prototype.startTag = function(stack, list){
         var i;
+        var n = this.stream.peek();
 
-        if(this.stream.peek() == '/')
+        if(n == '/')
         {
             this.stream.read();
             var nodeName = this.getNodeName();
@@ -2360,7 +2560,7 @@
                 this.pushTextNode(stack, list, "</", this.lineNumber);
             }
         }
-        else if(this.stream.peek() != '!')
+        else if(n != '!' && n != '%')
         {
             var nodeName = this.getNodeName();
 
@@ -2472,7 +2672,33 @@
         }
         else
         {
-            this.pushTextNode(stack, list, "<", this.lineNumber);
+            if(this.ignoreJspTag && n == '%')
+            {
+                this.stream.read();
+
+                while((i = this.stream.read()) != -1)
+                {
+                    if(i == '%' && this.stream.peek() == '>')
+                    {
+                        this.stream.read();
+                        break;
+                    }
+                }
+
+                while(this.stream.peek() == '\r')
+                {
+                    this.stream.read();
+                }
+
+                while(this.stream.peek() == '\n')
+                {
+                    this.stream.read();
+                }
+            }
+            else
+            {
+                this.pushTextNode(stack, list, "<", this.lineNumber);
+            }
         }
     };
 
