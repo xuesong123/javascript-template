@@ -38,7 +38,7 @@ DispatcherServlet.prototype.init = function(servletContext){
                             for(var name in mapping)
                             {
                                 config = mapping[name];
-                                chain.push({"pattern": config.pattern, "action": action, "method": name});
+                                chain.push({"source": filePath, "pattern": config.pattern, "action": action, "method": name});
                             }
                         }
                     }
@@ -81,8 +81,17 @@ DispatcherServlet.prototype.service = function(request, response, servletChain){
             var action = new config.action();
             action.request = request;
             action.response = response;
-            action[config.method].apply(action, args);
-            return true;
+            var method = action[config.method];
+
+            if(method != null)
+            {
+                method.apply(action, args);
+                return true;
+            }
+            else
+            {
+                throw new Error("A Error occurred in file \"" + config.source + "\", Message: The method \"" + config.method + "\" not found !");
+            }
         }
     }
 
