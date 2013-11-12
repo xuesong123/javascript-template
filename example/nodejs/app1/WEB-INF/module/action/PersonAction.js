@@ -7,8 +7,8 @@ var mapping = {};
 
 mapping["list"] = {"pattern": "^/person/list.do"};
 PersonAction.prototype.list = function(){
-    this.response.write("<p><a href=\"/person/test1.html\">test1</a></p>");
-    this.response.write("<p><a href=\"/person/test2/test3/.html\">test2</a></p>");
+    this.response.write("<p><a href=\"" + this.getContextPath() + "/person/test1.html\">test1</a></p>");
+    this.response.write("<p><a href=\"" + this.getContextPath() + "/person/test2/test3/.html\">test2</a></p>");
     this.response.end();
 };
 
@@ -26,7 +26,7 @@ PersonAction.prototype.test2 = function(arg1, arg2){
     this.response.end();
 };
 
-PersonAction.annotation = mapping;
+PersonAction.mapping = mapping;
 
 if(typeof(module) != "undefined")
 {

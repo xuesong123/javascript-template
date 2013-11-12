@@ -17,9 +17,9 @@ DispatcherServlet.prototype.init = function(servletContext){
         {
             var list = fs.readdirSync(lib);
 
-            for(var i = 0, length = list.length; i < length; i++)
+            for(var j = 0, length = list.length; j < length; j++)
             {
-                var fileName = list[i];
+                var fileName = list[j];
                 var filePath = path.join(lib, fileName);
                 var stats = fs.statSync(filePath);
 
@@ -73,9 +73,9 @@ DispatcherServlet.prototype.service = function(request, response, servletChain){
         {
             var args = [];
 
-            for(var i = 1; i < arr.length; i++)
+            for(var j = 1; j < arr.length; j++)
             {
-                args.push(arr[i]);
+                args.push(arr[j]);
             }
 
             var action = new config.action();

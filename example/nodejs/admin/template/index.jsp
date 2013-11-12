@@ -33,6 +33,7 @@
                     </c:choose>
                     <a href="/admin/watch.do?contextPath=${servletContext.path}">watch</a>
                     <a href="/admin/unwatch.do?contextPath=${servletContext.path}">unwatch</a>
+                    <a href="/admin/watch/flush.do?contextPath=${servletContext.path}">flush</a>
                 </td>
                 <td title="status: ${servletContext.status}">
                     <c:choose>

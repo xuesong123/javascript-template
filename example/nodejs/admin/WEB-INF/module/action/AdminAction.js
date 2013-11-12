@@ -1,13 +1,13 @@
-var AppAdminAction = function(){
+var AdminAction = function(){
     this.request = null;
     this.response = null;
 };
 
-AppAdminAction.prototype.forward = function(path){
+AdminAction.prototype.forward = function(path){
     this.request.getRequestDispatcher(path).forward(this.request, this.response);
 };
 
-AppAdminAction.prototype.getServletContextList = function(){
+AdminAction.prototype.getServletContextList = function(){
     var webApplication = this.request.getServletContext().getWebApplication();
     var webApplicationContext = webApplication.getWebApplicationContext();
     var list = webApplicationContext.getWebApplications();
@@ -21,7 +21,7 @@ AppAdminAction.prototype.getServletContextList = function(){
     return servletContextList;
 };
 
-AppAdminAction.prototype.getServletContext = function(contextPath){
+AdminAction.prototype.getServletContext = function(contextPath){
     var servletContextList = this.getServletContextList();
 
     for(var i = 0; i < servletContextList.length; i++)
@@ -40,14 +40,14 @@ AppAdminAction.prototype.getServletContext = function(contextPath){
 var mapping = {};
 
 mapping["list"] = {"pattern": "^/$|^/index.do$|^/list.do$"};
-AppAdminAction.prototype.list = function(){
+AdminAction.prototype.list = function(){
     var servletContextList = this.getServletContextList();
     this.request.setAttribute("servletContextList", servletContextList);
     this.forward("/template/index.jsp");
 };
 
 mapping["restart"] = {"pattern": "^/restart.do$"};
-AppAdminAction.prototype.restart = function(){
+AdminAction.prototype.restart = function(){
     var contextPath = this.request.getParameter("contextPath");
     var servletContext = this.getServletContext(contextPath);
 
@@ -60,7 +60,7 @@ AppAdminAction.prototype.restart = function(){
 };
 
 mapping["shutdown"] = {"pattern": "^/shutdown.do$"};
-AppAdminAction.prototype.shutdown = function(){
+AdminAction.prototype.shutdown = function(){
     var contextPath = this.request.getParameter("contextPath");
     var servletContext = this.getServletContext(contextPath);
 
@@ -88,7 +88,7 @@ AppAdminAction.prototype.shutdown = function(){
 };
 
 mapping["watch"] = {"pattern": "^/watch.do$"};
-AppAdminAction.prototype.watch = function(){
+AdminAction.prototype.watch = function(){
     var contextPath = this.request.getParameter("contextPath");
     var servletContext = this.getServletContext(contextPath);
 
@@ -101,7 +101,7 @@ AppAdminAction.prototype.watch = function(){
 };
 
 mapping["unwatch"] = {"pattern": "^/unwatch.do$"};
-AppAdminAction.prototype.unwatch = function(){
+AdminAction.prototype.unwatch = function(){
     var contextPath = this.request.getParameter("contextPath");
     var servletContext = this.getServletContext(contextPath);
 
@@ -113,23 +113,36 @@ AppAdminAction.prototype.unwatch = function(){
     this.response.redirect("/admin/list.do");
 };
 
+mapping["flush"] = {"pattern": "^/watch/flush.do$"};
+AdminAction.prototype.flush = function(){
+    var contextPath = this.request.getParameter("contextPath");
+    var servletContext = this.getServletContext(contextPath);
+
+    if(servletContext != null)
+    {
+        servletContext.getFileWatchDog().watch();
+    }
+
+    this.response.redirect("/admin/list.do");
+};
+
 /* http://localhost/admin/test/1/2/3.html */
 mapping["test"] = {"pattern": "^/test/(\\d+)/(\\d+)/(\\d+)\\.html$"};
-AppAdminAction.prototype.test = function(arg1, arg2, arg3){
+AdminAction.prototype.test = function(arg1, arg2, arg3){
     this.response.write("<h3>" + arg1 + ", " + arg2 + ", " + arg3 + "</h3>");
     this.response.end();
 };
 
 mapping["exit"] = {"pattern": "^/exit.do$"};
-AppAdminAction.prototype.exit = function(){
+AdminAction.prototype.exit = function(){
     this.response.write("<h3>Server exit !</h3>");
     this.response.end();
     process.exit(0);
 };
 
-AppAdminAction.mapping = mapping;
+AdminAction.mapping = mapping;
 
 if(typeof(module) != "undefined")
 {
-    module.exports.action = AppAdminAction;
+    module.exports.action = AdminAction;
 }
