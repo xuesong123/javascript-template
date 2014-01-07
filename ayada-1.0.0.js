@@ -4440,6 +4440,7 @@
                 case '\'':
                 {
                     buffer.push("&#39;");
+                    break;
                 }
                 default :
                 {
