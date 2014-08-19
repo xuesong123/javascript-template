@@ -24,7 +24,7 @@
             <tr>
                 <td>${servletContext.host}</td>
                 <td>${servletContext.getRealPath("/")}</td>
-                <td><a href="${servletContext.path}" target="_blank">${servletContext.path}</a></td>
+                <td><a href="${servletContext.path}/" target="_blank">${servletContext.path}</a></td>
                 <td title="watchStatus: ${servletContext.watchStatus}">
                     <c:choose>
                         <c:when test="${servletContext.watchStatus == 0}"><span style="color: #ff0000;">stoped</span></c:when>
@@ -33,6 +33,7 @@
                     </c:choose>
                     <a href="/admin/watch.do?contextPath=${servletContext.path}">watch</a>
                     <a href="/admin/unwatch.do?contextPath=${servletContext.path}">unwatch</a>
+                    <a href="/admin/watch/flush.do?contextPath=${servletContext.path}">flush</a>
                 </td>
                 <td title="status: ${servletContext.status}">
                     <c:choose>

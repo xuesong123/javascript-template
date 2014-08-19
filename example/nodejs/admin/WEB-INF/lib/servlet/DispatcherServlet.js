@@ -17,9 +17,9 @@ DispatcherServlet.prototype.init = function(servletContext){
         {
             var list = fs.readdirSync(lib);
 
-            for(var i = 0, length = list.length; i < length; i++)
+            for(var j = 0, length = list.length; j < length; j++)
             {
-                var fileName = list[i];
+                var fileName = list[j];
                 var filePath = path.join(lib, fileName);
                 var stats = fs.statSync(filePath);
 
@@ -38,7 +38,7 @@ DispatcherServlet.prototype.init = function(servletContext){
                             for(var name in mapping)
                             {
                                 config = mapping[name];
-                                chain.push({"pattern": config.pattern, "action": action, "method": name});
+                                chain.push({"source": filePath, "pattern": config.pattern, "action": action, "method": name});
                             }
                         }
                     }
@@ -73,16 +73,25 @@ DispatcherServlet.prototype.service = function(request, response, servletChain){
         {
             var args = [];
 
-            for(var i = 1; i < arr.length; i++)
+            for(var j = 1; j < arr.length; j++)
             {
-                args.push(arr[i]);
+                args.push(arr[j]);
             }
 
             var action = new config.action();
             action.request = request;
             action.response = response;
-            action[config.method].apply(action, args);
-            return true;
+            var method = action[config.method];
+
+            if(method != null)
+            {
+                method.apply(action, args);
+                return true;
+            }
+            else
+            {
+                throw new Error("A Error occurred in file \"" + config.source + "\", Message: The method \"" + config.method + "\" not found !");
+            }
         }
     }
 
