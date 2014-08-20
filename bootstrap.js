@@ -6,13 +6,26 @@ function startServer(args)
 {
     var options = new ayada.Options(args);
     var home = options.getOption("-home");
+    var port = options.getOption("-port");
 
     if(home == null)
     {
         home = ".";
     }
 
-    var webServer = ayada.Bootstrap.create("localhost|127\\.0\\.0\\.1", home);
+    if(port == null)
+    {
+        port = "80";
+    }
+
+    port = parseInt(port);
+
+    if(isNaN(port) || port < 1 || port > 65535)
+    {
+        port = 80;
+    }
+
+    var webServer = ayada.Bootstrap.create("localhost|127\\.0\\.0\\.1", port, home);
     webServer.start();
 
     var server = http.createServer(function(request, response){
@@ -39,8 +52,8 @@ function startServer(args)
         console.trace();
     });
 
-    server.listen(80, "localhost");
-    LogUtil.info("[Server]: Server start on port: 80");
+    server.listen(port, "localhost");
+    LogUtil.info("[Server]: Server start on port: " + port);
 };
 
 startServer(process.argv.slice(2));

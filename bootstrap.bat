@@ -17,4 +17,4 @@
 @ECHO.
 @ECHO.
 
-cmd /k node "bootstrap.js" "-home=%WEBAPP_HOME%"
+cmd /k node "bootstrap.js" "-home=%WEBAPP_HOME%" "-port=8080"
