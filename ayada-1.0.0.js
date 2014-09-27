@@ -2275,7 +2275,7 @@
             // skip space
             while((c = this.stream.read()) != -1)
             {
-                if(c != " ")
+                if(c != " " && c != "\r" && c != "\n" && c != "\t")
                 {
                     this.stream.back();
                     break;
